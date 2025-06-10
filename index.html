@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍽️ 윤이 뭐뭐 먹지?</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #fff9f0, #ffe0e0);
+      color: #333;
+      padding: 1rem;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      line-height: 1.2;
+    }
+    .tree {
+      display: block;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    .node {
+      position: relative;
+      padding-left: 2rem;
+      margin-bottom: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    .node::before {
+      content: '📍';
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .branch {
+      margin-left: 1.5rem;
+      border-left: 2px dashed #ccc;
+      padding-left: 1rem;
+    }
+    .random-button {
+      display: block;
+      margin: 2rem auto;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      background-color: #ff9a9e;
+      color: white;
+      border: none;
+      border-radius: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .random-button:hover {
+      background-color: #ff6a6a;
+    }
+    .result {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .ladder-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 4px;
+      height: 100%;
+      background-color: #ff6a6a;
+      animation: ladderFall 1s ease-in-out forwards;
+      display: none;
+    }
+    @keyframes ladderFall {
+      0% { height: 0%; }
+      100% { height: 100%; }
+    }
+    .highlight {
+      background-color: #fff3cd;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+      .tree {
+        padding: 0.5rem;
+      }
+      .node {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🥢 윤이의 메뉴 결정🍻</h1>
+  <div class="tree" id="tree">
+    <div class="ladder-line" id="ladder"></div>
+    <div class="node">❓ 술을 먹을 것인가?
+      <div class="branch">
+        <div class="node">🍶 <strong>Yes!</strong> 술을 먹는다
+          <div class="branch">
+            <div class="node">🍶 소주
+              <div class="branch">
+                <div class="node">삼겹살 🥩</div>
+                <div class="node">감자탕 🍲</div>
+                <div class="node">회 🐟</div>
+              </div>
+            </div>
+            <div class="node">🍺 맥주
+              <div class="branch">
+                <div class="node">치킨 🍗</div>
+                <div class="node">피자 🍕</div>
+                <div class="node">감바스 🍤</div>
+              </div>
+            </div>
+            <div class="node">🍷 와인
+              <div class="branch">
+                <div class="node">치즈 🧀</div>
+                <div class="node">파스타 🍝</div>
+                <div class="node">스테이크 🥩</div>
+              </div>
+            </div>
+            <div class="node">🍶 막걸리
+              <div class="branch">
+                <div class="node">파전 🥬</div>
+                <div class="node">도토리묵 🌰</div>
+                <div class="node">전골 🍲</div>
+              </div>
+            </div>
+            <div class="node">🍹 칵테일
+              <div class="branch">
+                <div class="node">나쵸 🌮</div>
+                <div class="node">타파스 🧆</div>
+                <div class="node">해산물 🦐</div>
+              </div>
+            </div>
+            <div class="node">🍶 고량주
+              <div class="branch">
+                <div class="node">훠궈 🔥</div>
+                <div class="node">양꼬치 🍢</div>
+                <div class="node">마라샹궈 🌶️</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="node">🚫 <strong>No!</strong> 술 안 먹는다
+          <div class="branch">
+            <div class="node">🍚 한식
+              <div class="branch">
+                <div class="node">국밥 🍲</div>
+                <div class="node">제육볶음 🐖</div>
+                <div class="node">비빔밥 🥗</div>
+              </div>
+            </div>
+            <div class="node">🥡 중식
+              <div class="branch">
+                <div class="node">짜장면 🍜</div>
+                <div class="node">탕수육 🍖</div>
+                <div class="node">마라탕 🌶️</div>
+              </div>
+            </div>
+            <div class="node">🍣 일식
+              <div class="branch">
+                <div class="node">돈카츠 🐷</div>
+                <div class="node">초밥 🍣</div>
+                <div class="node">우동 🍜</div>
+              </div>
+            </div>
+            <div class="node">🍝 양식
+              <div class="branch">
+                <div class="node">파스타 🍝</div>
+                <div class="node">리조또 🧄</div>
+                <div class="node">스테이크 🥩</div>
+              </div>
+            </div>
+            <div class="node">🍢 분식
+              <div class="branch">
+                <div class="node">떡볶이 🌶️</div>
+                <div class="node">순대 🐷</div>
+                <div class="node">김밥 🍙</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="random-button" onclick="runLadderAnimation()">✨ 사다리 타기 시작</button>
+  <div class="result" id="result"></div>
+  <script>
+    function runLadderAnimation() {
+      const ladder = document.getElementById('ladder');
+      const result = document.getElementById('result');
+      result.textContent = '';
+      ladder.style.display = 'block';
+      ladder.style.height = '0%';
+      ladder.style.animation = 'ladderFall 1s ease-in-out forwards';
+
+      const nodes = document.querySelectorAll('.node');
+      nodes.forEach(node => node.classList.remove('highlight'));
+
+      setTimeout(() => {
+        ladder.style.display = 'none';
+        simulateStepByStep();
+      }, 1100);
+    }
+
+    function simulateStepByStep() {
+      let current = document.querySelector('.tree > .node');
+      const path = [current];
+
+      while (true) {
+        const branch = current.querySelector(':scope > .branch');
+        if (!branch) break;
+        const children = Array.from(branch.children).filter(c => c.classList.contains('node'));
+        const next = children[Math.floor(Math.random() * children.length)];
+        path.push(next);
+        current = next;
+      }
+
+      let idx = 0;
+      const interval = setInterval(() => {
+        if (idx > 0) path[idx - 1].classList.remove('highlight');
+        if (idx < path.length) {
+          path[idx].classList.add('highlight');
+          idx++;
+        } else {
+          clearInterval(interval);
+          document.getElementById('result').textContent = `오늘은... ${current.textContent.trim()}!`;
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>
