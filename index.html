@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🍽️ 윤이 뭐뭐 먹지?</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(to bottom right, #fff9f0, #ffe0e0);
@@ -15,304 +13,315 @@
       padding: 1rem;
       margin: 0;
     }
-    h1 {
+    .header-container {
       text-align: center;
-      font-size: 2.5rem;
       margin-bottom: 2rem;
+    }
+    h1 {
+      font-size: 2.5rem;
       line-height: 1.2;
+      margin: 0 0 1rem 0;
     }
     .tree {
-      display: block;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 1rem;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: block; max-width: 800px; margin: 0 auto; padding: 1rem;
+      background: #fff; border-radius: 1rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       position: relative;
     }
     .node {
-      position: relative;
-      padding-left: 2rem;
-      margin-bottom: 1rem;
+      position: relative; padding-left: 1rem; margin-bottom: 1rem;
       transition: background-color 0.3s ease, opacity 0.5s ease;
-      display: flex; /* Flexbox for alignment */
-      justify-content: space-between; /* Space between text and button */
-      align-items: center; /* Center items vertically */
+      display: flex; justify-content: space-between; align-items: center;
     }
+    .node-content { display: flex; align-items: center; gap: 0.5rem; }
     .node-text::before {
-      content: '📍';
-      position: absolute;
-      left: 0;
-      top: 50%;
+      content: ''; /* Removed emoji */
+      position: absolute; left: 0; top: 50%;
       transform: translateY(-50%);
     }
+    .parent-node > .node-content { cursor: pointer; }
+    .toggle-icon {
+      display: inline-block; width: 1em; transition: transform 0.2s ease-in-out;
+      padding-right: 5px;
+    }
+    .parent-node.expanded > .node-content .toggle-icon { transform: rotate(90deg); }
     .branch {
-      margin-left: 1.5rem;
-      border-left: 2px dashed #ccc;
-      padding-left: 1rem;
+      margin-left: 1.5rem; border-left: 2px dashed #ccc; padding-left: 1rem;
       display: none;
     }
-    .branch.visible {
-      display: block;
-    }
-    .choice-node {
-      cursor: pointer;
-      border-radius: 8px;
-    }
-    .choice-node:hover {
-        background-color: #fdf5e6;
-    }
-    .selected {
-        background-color: #e0f7fa;
-        font-weight: bold;
-    }
-    .unselected {
-        opacity: 0.4;
-        pointer-events: none;
-    }
-    .removed .node-text {
-        text-decoration: line-through;
-        color: #aaa;
-    }
-    .removed {
-        opacity: 0.6;
-    }
-    .button-container {
-        text-align: center;
-        margin: 1.5rem 0;
-    }
+    .branch.visible { display: block; }
+    .choice-node { cursor: pointer; border-radius: 8px; }
+    .choice-node:hover { background-color: #fdf5e6; }
+    .selected { background-color: #e0f7fa; font-weight: bold; }
+    .unselected { opacity: 0.4; pointer-events: none; }
+    .removed .node-text { text-decoration: line-through; color: #aaa; }
+    .removed { opacity: 0.6; }
+    .button-container { text-align: center; margin: 1.5rem 0; }
     .action-button {
-      margin: 0 0.5rem;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      color: white;
-      border: none;
-      border-radius: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
+      margin: 0.25rem 0.5rem; padding: 0.75rem 1.5rem; font-size: 1rem;
+      color: white; border: none; border-radius: 1rem; cursor: pointer;
+      transition: all 0.3s ease;
     }
-    .action-button.start {
-        background-color: #ff9a9e;
-    }
-    .action-button.start:hover {
-        background-color: #ff6a6a;
-        transform: scale(1.05);
-    }
-    .action-button.reset {
-        background-color: #a0aec0;
-    }
-    .action-button.reset:hover {
-        background-color: #718096;
-        transform: scale(1.05);
-    }
+    .action-button.start { background-color: #ff9a9e; }
+    .action-button.start:hover { background-color: #ff6a6a; transform: scale(1.05); }
+    .action-button.reset { background-color: #a0aec0; }
+    .action-button.reset:hover { background-color: #718096; transform: scale(1.05); }
+    .action-button.search { background-color: #f7e600; color: #3d1e1f; font-weight: bold;}
+    .action-button.search:hover { background-color: #e8d700; transform: scale(1.05); }
+    .action-button.edit { background-color: #f6ad55; }
+    .action-button.edit:hover { background-color: #ed8936; transform: scale(1.05); }
     .result {
-      text-align: center;
-      margin-top: 1.5rem;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #d6336c;
-      min-height: 2rem;
+      text-align: center; margin-top: 1.5rem; font-size: 1.5rem;
+      font-weight: bold; color: #d6336c; min-height: 2rem;
     }
-    .highlight {
-      background-color: #fff3cd;
-      border-radius: 4px;
-    }
-    .hidden {
-        display: none;
-    }
+    .highlight { background-color: #fff3cd; border-radius: 4px; }
+    .hidden { display: none; }
     .remove-btn {
-        background-color: #fed7d7;
-        color: #c53030;
-        border: none;
-        border-radius: 50%;
-        width: 22px;
-        height: 22px;
-        font-size: 14px;
-        font-weight: bold;
-        line-height: 22px;
-        text-align: center;
-        cursor: pointer;
-        margin-left: 10px;
-        flex-shrink: 0;
-        transition: background-color 0.2s;
+      background-color: #fed7d7; color: #c53030; border: none; border-radius: 50%;
+      width: 22px; height: 22px; font-size: 14px; font-weight: bold;
+      line-height: 22px; text-align: center; cursor: pointer; margin-left: 10px;
+      flex-shrink: 0; transition: all 0.2s; display: none;
     }
-    .remove-btn:hover {
-        background-color: #fbb6b6;
+    .edit-mode .remove-btn { display: block; }
+    .remove-btn:hover { background-color: #fbb6b6; }
+    .node.removed .remove-btn { background-color: #c8e6c9; color: #2e7d32; }
+    .loading-spinner {
+        border: 4px solid #f3f3f3; border-top: 4px solid #3d1e1f;
+        border-radius: 50%; width: 20px; height: 20px;
+        animation: spin 1s linear infinite; display: inline-block;
+        margin-left: 10px; vertical-align: middle;
     }
-    .node.removed .remove-btn {
-        background-color: #c8e6c9;
-        color: #2e7d32;
-    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     @media (max-width: 600px) {
-      h1 {
-        font-size: 2rem;
-      }
-      .node {
-        font-size: 0.95rem;
-      }
-      .result {
-          font-size: 1.3rem;
-      }
+      h1 { font-size: 2rem; }
+      .node { font-size: 0.95rem; }
+      .result { font-size: 1.3rem; }
     }
   </style>
 </head>
-<body>
-  <h1>🥢 윤이의 메뉴 결정🍻</h1>
+<body class="">
+  <div class="header-container">
+    <h1>🥢 윤이 뭐뭐 먹지?</h1>
+  </div>
+  
   <div class="tree" id="tree">
+    <!-- Tree HTML structure remains the same -->
     <div class="node" id="root-node">
-        <span class="node-text">❓ 술을 먹을 것인가?</span>
+        <div class="node-content"><span class="node-text">❓ 술을 먹을 것인가?</span></div>
     </div>
       <div class="branch visible">
         <div class="node choice-node" id="choice-yes">
-          <span class="node-text">🍶 <strong>Yes!</strong> 술을 먹는다</span>
+          <div class="node-content"><span class="node-text">🍶 <strong>Yes!</strong> 술을 먹는다</span></div>
         </div>
           <div class="branch">
-            <div class="node"><span class="node-text">🍶 소주</span></div>
+            <div class="node parent-node"><div class="node-content"><span class="node-text">🍶 소주</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">삼겹살 🥩</span></div>
-                <div class="node"><span class="node-text">감자탕 🍲</span></div>
-                <div class="node"><span class="node-text">회 🐟</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">삼겹살</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">감자탕</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">회</span></div></div>
               </div>
-            <div class="node"><span class="node-text">🍺 맥주</span></div>
+            <div class="node parent-node"><div class="node-content"><span class="node-text">🍺 맥주</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">치킨 🍗</span></div>
-                <div class="node"><span class="node-text">피자 🍕</span></div>
-                <div class="node"><span class="node-text">감바스 🍤</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">치킨</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">피자</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">감바스</span></div></div>
               </div>
-            <div class="node"><span class="node-text">🍷 와인</span></div>
+            <div class="node parent-node"><div class="node-content"><span class="node-text">🍷 와인</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">치즈 🧀</span></div>
-                <div class="node"><span class="node-text">파스타 🍝</span></div>
-                <div class="node"><span class="node-text">스테이크 🥩</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">치즈</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">파스타</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">스테이크</span></div></div>
               </div>
-            <div class="node"><span class="node-text">🍶 막걸리</span></div>
+             <div class="node parent-node"><div class="node-content"><span class="node-text">🍶 막걸리</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">파전 🥬</span></div>
-                <div class="node"><span class="node-text">도토리묵 🌰</span></div>
-                <div class="node"><span class="node-text">전골 🍲</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">파전</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">도토리묵</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">전골</span></div></div>
               </div>
-            <div class="node"><span class="node-text">🍹 칵테일</span></div>
+             <div class="node parent-node"><div class="node-content"><span class="node-text">🍹 칵테일</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">나쵸 🌮</span></div>
-                <div class="node"><span class="node-text">타파스 🧆</span></div>
-                <div class="node"><span class="node-text">해산물 🦐</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">나쵸</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">타파스</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">해산물</span></div></div>
               </div>
-            <div class="node"><span class="node-text">🍶 고량주</span></div>
+            <div class="node parent-node"><div class="node-content"><span class="node-text">🍶 고량주</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">훠궈 🔥</span></div>
-                <div class="node"><span class="node-text">양꼬치 🍢</span></div>
-                <div class="node"><span class="node-text">마라샹궈 🌶️</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">훠궈</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">양꼬치</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">마라샹궈</span></div></div>
               </div>
           </div>
         <div class="node choice-node" id="choice-no">
-          <span class="node-text">🚫 <strong>No!</strong> 술 안 먹는다</span>
+          <div class="node-content"><span class="node-text">🚫 <strong>No!</strong> 술 안 먹는다</span></div>
         </div>
           <div class="branch">
-            <div class="node"><span class="node-text">🍚 한식</span></div>
+            <div class="node parent-node"><div class="node-content"><span class="node-text">🍚 한식</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">국밥 🍲</span></div>
-                <div class="node"><span class="node-text">제육볶음 🐖</span></div>
-                <div class="node"><span class="node-text">비빔밥 🥗</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">국밥</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">제육볶음</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">비빔밥</span></div></div>
               </div>
-            <div class="node"><span class="node-text">🥡 중식</span></div>
+            <div class="node parent-node"><div class="node-content"><span class="node-text">🥡 중식</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">짜장면 🍜</span></div>
-                <div class="node"><span class="node-text">탕수육 🍖</span></div>
-                <div class="node"><span class="node-text">마라탕 🌶️</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">짜장면</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">탕수육</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">마라탕</span></div></div>
               </div>
-            <div class="node"><span class="node-text">🍣 일식</span></div>
+            <div class="node parent-node"><div class="node-content"><span class="node-text">🍣 일식</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">돈카츠 🐷</span></div>
-                <div class="node"><span class="node-text">초밥 🍣</span></div>
-                <div class="node"><span class="node-text">우동 🍜</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">돈카츠</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">초밥</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">우동</span></div></div>
               </div>
-            <div class="node"><span class="node-text">🍝 양식</span></div>
+            <div class="node parent-node"><div class="node-content"><span class="node-text">🍝 양식</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">파스타 🍝</span></div>
-                <div class="node"><span class="node-text">리조또 🧄</span></div>
-                <div class="node"><span class="node-text">스테이크 🥩</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">파스타</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">리조또</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">스테이크</span></div></div>
               </div>
-            <div class="node"><span class="node-text">🍢 분식</span></div>
+            <div class="node parent-node"><div class="node-content"><span class="node-text">🍢 분식</span></div></div>
               <div class="branch">
-                <div class="node"><span class="node-text">떡볶이 🌶️</span></div>
-                <div class="node"><span class="node-text">순대 🐷</span></div>
-                <div class="node"><span class="node-text">김밥 🍙</span></div>
+                <div class="node"><div class="node-content"><span class="node-text">떡볶이</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">순대</span></div></div>
+                <div class="node"><div class="node-content"><span class="node-text">김밥</span></div></div>
               </div>
           </div>
       </div>
   </div>
 
   <div class="button-container hidden" id="button-container">
+      <button class="action-button edit" id="edit-button">✏️ 편집</button>
       <button class="action-button start" id="start-selection-button">✨ 메뉴 결정 시작!</button>
       <button class="action-button reset" id="reset-button">🔄 초기화</button>
+      <button class="action-button search hidden" id="kakaomap-button">📍 내 주변 맛집 검색</button>
   </div>
   <div class="result" id="result"></div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const choiceYes = document.getElementById('choice-yes');
-        const choiceNo = document.getElementById('choice-no');
+        const body = document.body;
+        const editButton = document.getElementById('edit-button');
         const startButton = document.getElementById('start-selection-button');
         const resetButton = document.getElementById('reset-button');
+        const kakaoMapButton = document.getElementById('kakaomap-button');
         const buttonContainer = document.getElementById('button-container');
         const resultDiv = document.getElementById('result');
+        
         let selectionStartNode = null;
+        let isEditMode = false;
 
-        // Add remove buttons to all nodes except the root
-        document.querySelectorAll('.node').forEach(node => {
-            if (node.id === 'root-node') return;
+        function setupNodes() {
+            document.querySelectorAll('.node').forEach(node => {
+                const nextBranch = findNextSibling(node, '.branch');
+                if (nextBranch) {
+                    node.classList.add('parent-node');
+                    const nodeContent = node.querySelector('.node-content');
+                    if (!nodeContent.querySelector('.toggle-icon')) {
+                        const toggleIcon = document.createElement('span');
+                        toggleIcon.className = 'toggle-icon';
+                        toggleIcon.textContent = '▶';
+                        nodeContent.insertBefore(toggleIcon, nodeContent.firstChild);
+                        nodeContent.addEventListener('click', () => {
+                            if (node.classList.contains('choice-node') && !isEditMode) return;
+                            toggleNode(node);
+                        });
+                    }
+                }
 
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.innerHTML = '&times;';
-            node.appendChild(removeBtn);
-
-            removeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                node.classList.toggle('removed');
-                removeBtn.innerHTML = node.classList.contains('removed') ? '&#43;' : '&times;';
+                if (!node.classList.contains('choice-node') && node.id !== 'root-node') {
+                     if (!node.querySelector('.remove-btn')) {
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'remove-btn';
+                        removeBtn.innerHTML = '&times;';
+                        node.appendChild(removeBtn);
+                        removeBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            node.classList.toggle('removed');
+                            removeBtn.innerHTML = node.classList.contains('removed') ? '&#43;' : '&times;';
+                        });
+                    }
+                }
             });
-        });
+        }
+
+        function toggleNode(node, forceExpand = false) {
+            const nextBranch = findNextSibling(node, '.branch');
+            if (!nextBranch) return;
+
+            const isExpanded = node.classList.contains('expanded');
+            if (forceExpand && isExpanded) return;
+            
+            node.classList.toggle('expanded', forceExpand || !isExpanded);
+            nextBranch.classList.toggle('visible', forceExpand || !isExpanded);
+            const icon = node.querySelector('.toggle-icon');
+            if(icon) {
+                 icon.style.transform = (forceExpand || !isExpanded) ? 'rotate(90deg)' : 'rotate(0deg)';
+            }
+        }
 
         function makeChoice(selectedNode, unselectedNode) {
             selectedNode.classList.add('selected');
             unselectedNode.classList.add('unselected');
-            
-            choiceYes.style.pointerEvents = 'none';
-            choiceNo.style.pointerEvents = 'none';
-
-            const selectedBranch = findNextSibling(selectedNode, '.branch');
-            if (selectedBranch) {
-                selectedBranch.classList.add('visible');
-            }
-
+            document.getElementById('choice-yes').style.pointerEvents = 'none';
+            document.getElementById('choice-no').style.pointerEvents = 'none';
+            toggleNode(selectedNode, true);
             selectionStartNode = selectedNode;
-
             buttonContainer.classList.remove('hidden');
             const choiceText = selectedNode.id === 'choice-yes' ? '술과 안주' : '메뉴';
             startButton.textContent = `✨ 오늘의 ${choiceText} 결정!`;
         }
         
-        choiceYes.addEventListener('click', () => makeChoice(choiceYes, choiceNo), { once: true });
-        choiceNo.addEventListener('click', () => makeChoice(choiceNo, choiceYes), { once: true });
+        document.getElementById('choice-yes').addEventListener('click', () => makeChoice(document.getElementById('choice-yes'), document.getElementById('choice-no')));
+        document.getElementById('choice-no').addEventListener('click', () => makeChoice(document.getElementById('choice-no'), document.getElementById('choice-yes')));
         
+        editButton.addEventListener('click', () => {
+            isEditMode = !isEditMode;
+            body.classList.toggle('edit-mode');
+            editButton.innerHTML = isEditMode ? '✅ 완료' : '✏️ 편집';
+        });
+
         startButton.addEventListener('click', () => {
             if (!selectionStartNode) return;
-            resultDiv.textContent = '';
-            document.querySelectorAll('.node.highlight').forEach(n => n.classList.remove('highlight'));
+            resetUIState();
             buttonContainer.classList.add('hidden');
             simulateStepByStep(selectionStartNode);
         });
 
         resetButton.addEventListener('click', () => {
-            // Reset all choices and UI
-            document.querySelectorAll('.node.removed').forEach(node => {
-                node.classList.remove('removed');
-                const btn = node.querySelector('.remove-btn');
-                if (btn) btn.innerHTML = '&times;';
-            });
+            location.reload();
         });
+
+        kakaoMapButton.addEventListener('click', () => {
+            const foodName = kakaoMapButton.dataset.food;
+            if (!foodName) return;
+
+            resultDiv.innerHTML = '위치 정보 가져오는 중... <div class="loading-spinner"></div>';
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const query = encodeURIComponent(foodName.split(' ')[0]);
+                    
+                    const url = `https://map.kakao.com/link/search/${query}`;
+                    
+                    window.open(url, '_blank');
+                    resultDiv.textContent = `✅ '${foodName}' 주변 맛집을 카카오맵에서 확인하세요!`;
+                },
+                () => {
+                    resultDiv.textContent = '위치 정보를 가져올 수 없어, 기본 검색을 실행합니다.';
+                    const query = encodeURIComponent(foodName.split(' ')[0]);
+                    const url = `https://map.kakao.com/link/search/${query}`;
+                    window.open(url, '_blank');
+                }
+            );
+        });
+
+        function resetUIState() {
+             document.querySelectorAll('.highlight').forEach(n => n.classList.remove('highlight'));
+             resultDiv.innerHTML = '';
+             buttonContainer.classList.add('hidden');
+             kakaoMapButton.classList.add('hidden');
+        }
 
         function findNextSibling(element, selector) {
             let sibling = element.nextElementSibling;
@@ -323,6 +332,17 @@
             return null;
         }
 
+        function ensurePathVisible(node) {
+            let current = node.parentElement;
+            while (current && current.id !== 'tree') {
+                if (current.classList.contains('branch')) {
+                    const parentNode = current.previousElementSibling;
+                    if (parentNode) toggleNode(parentNode, true);
+                }
+                current = current.parentElement;
+            }
+        }
+        
         function simulateStepByStep(startNode) {
             let current = startNode;
             const path = [current];
@@ -330,22 +350,20 @@
             while (true) {
                 const branch = findNextSibling(current, '.branch');
                 if (!branch) break;
-
-                branch.classList.add('visible');
-
-                // Filter out removed nodes
+                
                 const availableChildren = Array.from(branch.querySelectorAll(':scope > .node')).filter(c => !c.classList.contains('removed'));
 
                 if (availableChildren.length === 0) {
-                    resultDiv.textContent = `🤔 '${current.querySelector('.node-text').textContent.trim()}' 카테고리의 모든 메뉴가 제외되었어요!`;
-                    buttonContainer.classList.remove('hidden'); // Show buttons again
-                    return; // Stop if no options are available
+                    resultDiv.textContent = `🤔 '${current.querySelector('.node-text').textContent.trim()}' 카테고리 메뉴가 모두 제외되었어요!`;
+                    buttonContainer.classList.remove('hidden');
+                    return;
                 }
-                
                 const next = availableChildren[Math.floor(Math.random() * availableChildren.length)];
                 path.push(next);
                 current = next;
             }
+            
+            path.forEach(ensurePathVisible);
 
             let idx = 0;
             const interval = setInterval(() => {
@@ -358,12 +376,18 @@
                 } else {
                     clearInterval(interval);
                     const finalChoice = path[path.length - 1];
+                    const finalText = finalChoice.querySelector('.node-text').textContent.trim();
                     finalChoice.classList.add('highlight');
-                    resultDiv.innerHTML = `🎉 오늘은... <strong>${finalChoice.querySelector('.node-text').textContent.trim()}</strong>! 🎉`;
+                    resultDiv.innerHTML = `🎉 오늘은... <strong>${finalText}</strong>! 🎉`;
+                    
+                    kakaoMapButton.dataset.food = finalText;
                     buttonContainer.classList.remove('hidden');
+                    kakaoMapButton.classList.remove('hidden');
                 }
             }, 700);
         }
+        
+        setupNodes();
     });
   </script>
 </body>
