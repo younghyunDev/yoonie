@@ -36,22 +36,24 @@
       padding-left: 2rem;
       margin-bottom: 1rem;
       transition: background-color 0.3s ease, opacity 0.5s ease;
+      display: flex; /* Flexbox for alignment */
+      justify-content: space-between; /* Space between text and button */
+      align-items: center; /* Center items vertically */
     }
-    .node::before {
+    .node-text::before {
       content: '📍';
       position: absolute;
       left: 0;
-      top: 0;
+      top: 50%;
+      transform: translateY(-50%);
     }
     .branch {
       margin-left: 1.5rem;
       border-left: 2px dashed #ccc;
       padding-left: 1rem;
-      /* 하위 메뉴는 기본적으로 숨김 */
       display: none;
     }
     .branch.visible {
-      /* 선택된 하위 메뉴를 표시 */
       display: block;
     }
     .choice-node {
@@ -59,7 +61,7 @@
       border-radius: 8px;
     }
     .choice-node:hover {
-        background-color: #fdf5e6; /* 부드러운 호버 효과 */
+        background-color: #fdf5e6;
     }
     .selected {
         background-color: #e0f7fa;
@@ -67,28 +69,47 @@
     }
     .unselected {
         opacity: 0.4;
-        pointer-events: none; /* 클릭 비활성화 */
+        pointer-events: none;
+    }
+    .removed .node-text {
+        text-decoration: line-through;
+        color: #aaa;
+    }
+    .removed {
+        opacity: 0.6;
+    }
+    .button-container {
+        text-align: center;
+        margin: 1.5rem 0;
     }
     .action-button {
-      display: block;
-      margin: 2rem auto;
+      margin: 0 0.5rem;
       padding: 0.75rem 1.5rem;
       font-size: 1rem;
-      background-color: #ff9a9e;
       color: white;
       border: none;
       border-radius: 1rem;
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s ease;
     }
-    .action-button:hover {
-      background-color: #ff6a6a;
-      transform: scale(1.05);
+    .action-button.start {
+        background-color: #ff9a9e;
+    }
+    .action-button.start:hover {
+        background-color: #ff6a6a;
+        transform: scale(1.05);
+    }
+    .action-button.reset {
+        background-color: #a0aec0;
+    }
+    .action-button.reset:hover {
+        background-color: #718096;
+        transform: scale(1.05);
     }
     .result {
       text-align: center;
       margin-top: 1.5rem;
-      font-size: 1.5rem; /* 결과 텍스트 크기 증가 */
+      font-size: 1.5rem;
       font-weight: bold;
       color: #d6336c;
       min-height: 2rem;
@@ -100,12 +121,32 @@
     .hidden {
         display: none;
     }
+    .remove-btn {
+        background-color: #fed7d7;
+        color: #c53030;
+        border: none;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 22px;
+        text-align: center;
+        cursor: pointer;
+        margin-left: 10px;
+        flex-shrink: 0;
+        transition: background-color 0.2s;
+    }
+    .remove-btn:hover {
+        background-color: #fbb6b6;
+    }
+    .node.removed .remove-btn {
+        background-color: #c8e6c9;
+        color: #2e7d32;
+    }
     @media (max-width: 600px) {
       h1 {
         font-size: 2rem;
-      }
-      .tree {
-        padding: 0.5rem;
       }
       .node {
         font-size: 0.95rem;
@@ -119,189 +160,210 @@
 <body>
   <h1>🥢 윤이의 메뉴 결정🍻</h1>
   <div class="tree" id="tree">
-    <div class="node">❓ 술을 먹을 것인가?
-      <div class="branch visible"> <div class="node choice-node" id="choice-yes">🍶 <strong>Yes!</strong> 술을 먹는다
-          <div class="branch">
-            <div class="node">🍶 소주
-              <div class="branch">
-                <div class="node">삼겹살 🥩</div>
-                <div class="node">감자탕 🍲</div>
-                <div class="node">회 🐟</div>
-              </div>
-            </div>
-            <div class="node">🍺 맥주
-              <div class="branch">
-                <div class="node">치킨 🍗</div>
-                <div class="node">피자 🍕</div>
-                <div class="node">감바스 🍤</div>
-              </div>
-            </div>
-            <div class="node">🍷 와인
-              <div class="branch">
-                <div class="node">치즈 🧀</div>
-                <div class="node">파스타 🍝</div>
-                <div class="node">스테이크 🥩</div>
-              </div>
-            </div>
-            <div class="node">🍶 막걸리
-              <div class="branch">
-                <div class="node">파전 🥬</div>
-                <div class="node">도토리묵 🌰</div>
-                <div class="node">전골 🍲</div>
-              </div>
-            </div>
-            <div class="node">🍹 칵테일
-              <div class="branch">
-                <div class="node">나쵸 🌮</div>
-                <div class="node">타파스 🧆</div>
-                <div class="node">해산물 🦐</div>
-              </div>
-            </div>
-            <div class="node">🍶 고량주
-              <div class="branch">
-                <div class="node">훠궈 🔥</div>
-                <div class="node">양꼬치 🍢</div>
-                <div class="node">마라샹궈 🌶️</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="node choice-node" id="choice-no">🚫 <strong>No!</strong> 술 안 먹는다
-          <div class="branch">
-            <div class="node">🍚 한식
-              <div class="branch">
-                <div class="node">국밥 🍲</div>
-                <div class="node">제육볶음 🐖</div>
-                <div class="node">비빔밥 🥗</div>
-              </div>
-            </div>
-            <div class="node">🥡 중식
-              <div class="branch">
-                <div class="node">짜장면 🍜</div>
-                <div class="node">탕수육 🍖</div>
-                <div class="node">마라탕 🌶️</div>
-              </div>
-            </div>
-            <div class="node">🍣 일식
-              <div class="branch">
-                <div class="node">돈카츠 🐷</div>
-                <div class="node">초밥 🍣</div>
-                <div class="node">우동 🍜</div>
-              </div>
-            </div>
-            <div class="node">🍝 양식
-              <div class="branch">
-                <div class="node">파스타 🍝</div>
-                <div class="node">리조또 🧄</div>
-                <div class="node">스테이크 🥩</div>
-              </div>
-            </div>
-            <div class="node">🍢 분식
-              <div class="branch">
-                <div class="node">떡볶이 🌶️</div>
-                <div class="node">순대 🐷</div>
-                <div class="node">김밥 🍙</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="node" id="root-node">
+        <span class="node-text">❓ 술을 먹을 것인가?</span>
     </div>
+      <div class="branch visible">
+        <div class="node choice-node" id="choice-yes">
+          <span class="node-text">🍶 <strong>Yes!</strong> 술을 먹는다</span>
+        </div>
+          <div class="branch">
+            <div class="node"><span class="node-text">🍶 소주</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">삼겹살 🥩</span></div>
+                <div class="node"><span class="node-text">감자탕 🍲</span></div>
+                <div class="node"><span class="node-text">회 🐟</span></div>
+              </div>
+            <div class="node"><span class="node-text">🍺 맥주</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">치킨 🍗</span></div>
+                <div class="node"><span class="node-text">피자 🍕</span></div>
+                <div class="node"><span class="node-text">감바스 🍤</span></div>
+              </div>
+            <div class="node"><span class="node-text">🍷 와인</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">치즈 🧀</span></div>
+                <div class="node"><span class="node-text">파스타 🍝</span></div>
+                <div class="node"><span class="node-text">스테이크 🥩</span></div>
+              </div>
+            <div class="node"><span class="node-text">🍶 막걸리</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">파전 🥬</span></div>
+                <div class="node"><span class="node-text">도토리묵 🌰</span></div>
+                <div class="node"><span class="node-text">전골 🍲</span></div>
+              </div>
+            <div class="node"><span class="node-text">🍹 칵테일</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">나쵸 🌮</span></div>
+                <div class="node"><span class="node-text">타파스 🧆</span></div>
+                <div class="node"><span class="node-text">해산물 🦐</span></div>
+              </div>
+            <div class="node"><span class="node-text">🍶 고량주</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">훠궈 🔥</span></div>
+                <div class="node"><span class="node-text">양꼬치 🍢</span></div>
+                <div class="node"><span class="node-text">마라샹궈 🌶️</span></div>
+              </div>
+          </div>
+        <div class="node choice-node" id="choice-no">
+          <span class="node-text">🚫 <strong>No!</strong> 술 안 먹는다</span>
+        </div>
+          <div class="branch">
+            <div class="node"><span class="node-text">🍚 한식</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">국밥 🍲</span></div>
+                <div class="node"><span class="node-text">제육볶음 🐖</span></div>
+                <div class="node"><span class="node-text">비빔밥 🥗</span></div>
+              </div>
+            <div class="node"><span class="node-text">🥡 중식</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">짜장면 🍜</span></div>
+                <div class="node"><span class="node-text">탕수육 🍖</span></div>
+                <div class="node"><span class="node-text">마라탕 🌶️</span></div>
+              </div>
+            <div class="node"><span class="node-text">🍣 일식</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">돈카츠 🐷</span></div>
+                <div class="node"><span class="node-text">초밥 🍣</span></div>
+                <div class="node"><span class="node-text">우동 🍜</span></div>
+              </div>
+            <div class="node"><span class="node-text">🍝 양식</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">파스타 🍝</span></div>
+                <div class="node"><span class="node-text">리조또 🧄</span></div>
+                <div class="node"><span class="node-text">스테이크 🥩</span></div>
+              </div>
+            <div class="node"><span class="node-text">🍢 분식</span></div>
+              <div class="branch">
+                <div class="node"><span class="node-text">떡볶이 🌶️</span></div>
+                <div class="node"><span class="node-text">순대 🐷</span></div>
+                <div class="node"><span class="node-text">김밥 🍙</span></div>
+              </div>
+          </div>
+      </div>
   </div>
 
-  <button class="action-button hidden" id="start-selection-button">✨ 메뉴 결정 시작!</button>
+  <div class="button-container hidden" id="button-container">
+      <button class="action-button start" id="start-selection-button">✨ 메뉴 결정 시작!</button>
+      <button class="action-button reset" id="reset-button">🔄 초기화</button>
+  </div>
   <div class="result" id="result"></div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const choiceYes = document.getElementById('choice-yes');
-      const choiceNo = document.getElementById('choice-no');
-      const startButton = document.getElementById('start-selection-button');
-      const resultDiv = document.getElementById('result');
-      let selectionStartNode = null;
+        const choiceYes = document.getElementById('choice-yes');
+        const choiceNo = document.getElementById('choice-no');
+        const startButton = document.getElementById('start-selection-button');
+        const resetButton = document.getElementById('reset-button');
+        const buttonContainer = document.getElementById('button-container');
+        const resultDiv = document.getElementById('result');
+        let selectionStartNode = null;
 
-      function makeChoice(selectedNode, unselectedNode) {
-        // 선택한 노드를 강조하고 다른 노드는 비활성화
-        selectedNode.classList.add('selected');
-        unselectedNode.classList.add('unselected');
+        // Add remove buttons to all nodes except the root
+        document.querySelectorAll('.node').forEach(node => {
+            if (node.id === 'root-node') return;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '&times;';
+            node.appendChild(removeBtn);
+
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                node.classList.toggle('removed');
+                removeBtn.innerHTML = node.classList.contains('removed') ? '&#43;' : '&times;';
+            });
+        });
+
+        function makeChoice(selectedNode, unselectedNode) {
+            selectedNode.classList.add('selected');
+            unselectedNode.classList.add('unselected');
+            
+            choiceYes.style.pointerEvents = 'none';
+            choiceNo.style.pointerEvents = 'none';
+
+            const selectedBranch = findNextSibling(selectedNode, '.branch');
+            if (selectedBranch) {
+                selectedBranch.classList.add('visible');
+            }
+
+            selectionStartNode = selectedNode;
+
+            buttonContainer.classList.remove('hidden');
+            const choiceText = selectedNode.id === 'choice-yes' ? '술과 안주' : '메뉴';
+            startButton.textContent = `✨ 오늘의 ${choiceText} 결정!`;
+        }
         
-        // 상위 선택 노드들의 클릭 이벤트를 비활성화
-        choiceYes.style.pointerEvents = 'none';
-        choiceNo.style.pointerEvents = 'none';
+        choiceYes.addEventListener('click', () => makeChoice(choiceYes, choiceNo), { once: true });
+        choiceNo.addEventListener('click', () => makeChoice(choiceNo, choiceYes), { once: true });
+        
+        startButton.addEventListener('click', () => {
+            if (!selectionStartNode) return;
+            resultDiv.textContent = '';
+            document.querySelectorAll('.node.highlight').forEach(n => n.classList.remove('highlight'));
+            buttonContainer.classList.add('hidden');
+            simulateStepByStep(selectionStartNode);
+        });
 
-        // 선택한 노드의 하위 브랜치를 표시
-        const selectedBranch = selectedNode.querySelector(':scope > .branch');
-        if (selectedBranch) {
-            selectedBranch.classList.add('visible');
+        resetButton.addEventListener('click', () => {
+            // Reset all choices and UI
+            document.querySelectorAll('.node.removed').forEach(node => {
+                node.classList.remove('removed');
+                const btn = node.querySelector('.remove-btn');
+                if (btn) btn.innerHTML = '&times;';
+            });
+        });
+
+        function findNextSibling(element, selector) {
+            let sibling = element.nextElementSibling;
+            while(sibling) {
+                if (sibling.matches(selector)) return sibling;
+                sibling = sibling.nextElementSibling;
+            }
+            return null;
         }
 
-        // 최종 선택 시작 노드로 설정
-        selectionStartNode = selectedNode;
+        function simulateStepByStep(startNode) {
+            let current = startNode;
+            const path = [current];
 
-        // 최종 선택 버튼을 표시
-        startButton.classList.remove('hidden');
-        const choiceText = selectedNode.textContent.trim().startsWith('Yes') ? '술과 안주' : '메뉴';
-        startButton.textContent = `✨ 오늘의 ${choiceText} 결정!`;
-      }
+            while (true) {
+                const branch = findNextSibling(current, '.branch');
+                if (!branch) break;
 
-      // 각 선택지에 클릭 이벤트 리스너 추가 (한 번만 실행)
-      choiceYes.addEventListener('click', () => makeChoice(choiceYes, choiceNo), { once: true });
-      choiceNo.addEventListener('click', () => makeChoice(choiceNo, choiceYes), { once: true });
-      
-      // 메뉴 결정 시작 버튼 클릭 이벤트
-      startButton.addEventListener('click', () => {
-        if (!selectionStartNode) return;
+                branch.classList.add('visible');
 
-        // 이전 결과와 하이라이트 초기화
-        resultDiv.textContent = '';
-        document.querySelectorAll('.node.highlight').forEach(n => n.classList.remove('highlight'));
-        startButton.classList.add('hidden'); // 버튼 숨기기
+                // Filter out removed nodes
+                const availableChildren = Array.from(branch.querySelectorAll(':scope > .node')).filter(c => !c.classList.contains('removed'));
 
-        simulateStepByStep(selectionStartNode);
-      });
+                if (availableChildren.length === 0) {
+                    resultDiv.textContent = `🤔 '${current.querySelector('.node-text').textContent.trim()}' 카테고리의 모든 메뉴가 제외되었어요!`;
+                    buttonContainer.classList.remove('hidden'); // Show buttons again
+                    return; // Stop if no options are available
+                }
+                
+                const next = availableChildren[Math.floor(Math.random() * availableChildren.length)];
+                path.push(next);
+                current = next;
+            }
 
-      function simulateStepByStep(startNode) {
-        let current = startNode;
-        const path = [current];
-
-        // startNode부터 시작하여 최종 메뉴까지의 경로를 무작위로 결정
-        while (true) {
-          const branch = current.querySelector(':scope > .branch');
-          if (!branch) break; // 자식 브랜치가 없으면(최종 메뉴) 중지
-
-          // 현재 단계의 선택지들이 보이도록 브랜치를 표시
-          branch.classList.add('visible');
-
-          const children = Array.from(branch.children).filter(c => c.classList.contains('node'));
-          if (children.length === 0) break; // 브랜치에 노드가 없으면 중지
-
-          // 다음 단계 노드를 무작위로 선택
-          const next = children[Math.floor(Math.random() * children.length)];
-          path.push(next);
-          current = next;
+            let idx = 0;
+            const interval = setInterval(() => {
+                if (idx > 0 && path[idx - 1] !== selectionStartNode) {
+                    path[idx - 1].classList.remove('highlight');
+                }
+                if (idx < path.length) {
+                    path[idx].classList.add('highlight');
+                    idx++;
+                } else {
+                    clearInterval(interval);
+                    const finalChoice = path[path.length - 1];
+                    finalChoice.classList.add('highlight');
+                    resultDiv.innerHTML = `🎉 오늘은... <strong>${finalChoice.querySelector('.node-text').textContent.trim()}</strong>! 🎉`;
+                    buttonContainer.classList.remove('hidden');
+                }
+            }, 700);
         }
-
-        // 결정된 경로를 따라 순차적으로 하이라이트 애니메이션 실행
-        let idx = 0;
-        const interval = setInterval(() => {
-          // 이전 단계의 하이라이트 제거 (첫 선택지는 유지)
-          if (idx > 0 && path[idx - 1] !== selectionStartNode) {
-            path[idx - 1].classList.remove('highlight');
-          }
-
-          // 현재 단계 노드 하이라이트
-          if (idx < path.length) {
-            path[idx].classList.add('highlight');
-            idx++;
-          } else {
-            clearInterval(interval);
-            // 최종 선택된 메뉴를 강조하고 결과 텍스트 표시
-            const finalChoice = path[path.length - 1];
-            finalChoice.classList.add('highlight');
-            resultDiv.innerHTML = `🎉 오늘은... <strong>${finalChoice.textContent.trim()}</strong>! 🎉`;
-          }
-        }, 700); // 애니메이션 간격
-      }
     });
   </script>
 </body>
