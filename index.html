@@ -35,7 +35,7 @@
       position: relative;
       padding-left: 2rem;
       margin-bottom: 1rem;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s ease, opacity 0.5s ease;
     }
     .node::before {
       content: '📍';
@@ -47,8 +47,29 @@
       margin-left: 1.5rem;
       border-left: 2px dashed #ccc;
       padding-left: 1rem;
+      /* 하위 메뉴는 기본적으로 숨김 */
+      display: none;
     }
-    .random-button {
+    .branch.visible {
+      /* 선택된 하위 메뉴를 표시 */
+      display: block;
+    }
+    .choice-node {
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    .choice-node:hover {
+        background-color: #fdf5e6; /* 부드러운 호버 효과 */
+    }
+    .selected {
+        background-color: #e0f7fa;
+        font-weight: bold;
+    }
+    .unselected {
+        opacity: 0.4;
+        pointer-events: none; /* 클릭 비활성화 */
+    }
+    .action-button {
       display: block;
       margin: 2rem auto;
       padding: 0.75rem 1.5rem;
@@ -58,33 +79,26 @@
       border: none;
       border-radius: 1rem;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
-    .random-button:hover {
+    .action-button:hover {
       background-color: #ff6a6a;
+      transform: scale(1.05);
     }
     .result {
       text-align: center;
-      margin-top: 1rem;
-      font-size: 1.2rem;
+      margin-top: 1.5rem;
+      font-size: 1.5rem; /* 결과 텍스트 크기 증가 */
       font-weight: bold;
-    }
-    .ladder-line {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      width: 4px;
-      height: 100%;
-      background-color: #ff6a6a;
-      animation: ladderFall 1s ease-in-out forwards;
-      display: none;
-    }
-    @keyframes ladderFall {
-      0% { height: 0%; }
-      100% { height: 100%; }
+      color: #d6336c;
+      min-height: 2rem;
     }
     .highlight {
       background-color: #fff3cd;
+      border-radius: 4px;
+    }
+    .hidden {
+        display: none;
     }
     @media (max-width: 600px) {
       h1 {
@@ -96,16 +110,17 @@
       .node {
         font-size: 0.95rem;
       }
+      .result {
+          font-size: 1.3rem;
+      }
     }
   </style>
 </head>
 <body>
   <h1>🥢 윤이의 메뉴 결정🍻</h1>
   <div class="tree" id="tree">
-    <div class="ladder-line" id="ladder"></div>
     <div class="node">❓ 술을 먹을 것인가?
-      <div class="branch">
-        <div class="node">🍶 <strong>Yes!</strong> 술을 먹는다
+      <div class="branch visible"> <div class="node choice-node" id="choice-yes">🍶 <strong>Yes!</strong> 술을 먹는다
           <div class="branch">
             <div class="node">🍶 소주
               <div class="branch">
@@ -151,7 +166,7 @@
             </div>
           </div>
         </div>
-        <div class="node">🚫 <strong>No!</strong> 술 안 먹는다
+        <div class="node choice-node" id="choice-no">🚫 <strong>No!</strong> 술 안 먹는다
           <div class="branch">
             <div class="node">🍚 한식
               <div class="branch">
@@ -193,51 +208,101 @@
       </div>
     </div>
   </div>
-  <button class="random-button" onclick="runLadderAnimation()">✨ 사다리 타기 시작</button>
+
+  <button class="action-button hidden" id="start-selection-button">✨ 메뉴 결정 시작!</button>
   <div class="result" id="result"></div>
+
   <script>
-    function runLadderAnimation() {
-      const ladder = document.getElementById('ladder');
-      const result = document.getElementById('result');
-      result.textContent = '';
-      ladder.style.display = 'block';
-      ladder.style.height = '0%';
-      ladder.style.animation = 'ladderFall 1s ease-in-out forwards';
+    document.addEventListener('DOMContentLoaded', () => {
+      const choiceYes = document.getElementById('choice-yes');
+      const choiceNo = document.getElementById('choice-no');
+      const startButton = document.getElementById('start-selection-button');
+      const resultDiv = document.getElementById('result');
+      let selectionStartNode = null;
 
-      const nodes = document.querySelectorAll('.node');
-      nodes.forEach(node => node.classList.remove('highlight'));
+      function makeChoice(selectedNode, unselectedNode) {
+        // 선택한 노드를 강조하고 다른 노드는 비활성화
+        selectedNode.classList.add('selected');
+        unselectedNode.classList.add('unselected');
+        
+        // 상위 선택 노드들의 클릭 이벤트를 비활성화
+        choiceYes.style.pointerEvents = 'none';
+        choiceNo.style.pointerEvents = 'none';
 
-      setTimeout(() => {
-        ladder.style.display = 'none';
-        simulateStepByStep();
-      }, 1100);
-    }
+        // 선택한 노드의 하위 브랜치를 표시
+        const selectedBranch = selectedNode.querySelector(':scope > .branch');
+        if (selectedBranch) {
+            selectedBranch.classList.add('visible');
+        }
 
-    function simulateStepByStep() {
-      let current = document.querySelector('.tree > .node');
-      const path = [current];
+        // 최종 선택 시작 노드로 설정
+        selectionStartNode = selectedNode;
 
-      while (true) {
-        const branch = current.querySelector(':scope > .branch');
-        if (!branch) break;
-        const children = Array.from(branch.children).filter(c => c.classList.contains('node'));
-        const next = children[Math.floor(Math.random() * children.length)];
-        path.push(next);
-        current = next;
+        // 최종 선택 버튼을 표시
+        startButton.classList.remove('hidden');
+        const choiceText = selectedNode.textContent.trim().startsWith('Yes') ? '술과 안주' : '메뉴';
+        startButton.textContent = `✨ 오늘의 ${choiceText} 결정!`;
       }
 
-      let idx = 0;
-      const interval = setInterval(() => {
-        if (idx > 0) path[idx - 1].classList.remove('highlight');
-        if (idx < path.length) {
-          path[idx].classList.add('highlight');
-          idx++;
-        } else {
-          clearInterval(interval);
-          document.getElementById('result').textContent = `오늘은... ${current.textContent.trim()}!`;
+      // 각 선택지에 클릭 이벤트 리스너 추가 (한 번만 실행)
+      choiceYes.addEventListener('click', () => makeChoice(choiceYes, choiceNo), { once: true });
+      choiceNo.addEventListener('click', () => makeChoice(choiceNo, choiceYes), { once: true });
+      
+      // 메뉴 결정 시작 버튼 클릭 이벤트
+      startButton.addEventListener('click', () => {
+        if (!selectionStartNode) return;
+
+        // 이전 결과와 하이라이트 초기화
+        resultDiv.textContent = '';
+        document.querySelectorAll('.node.highlight').forEach(n => n.classList.remove('highlight'));
+        startButton.classList.add('hidden'); // 버튼 숨기기
+
+        simulateStepByStep(selectionStartNode);
+      });
+
+      function simulateStepByStep(startNode) {
+        let current = startNode;
+        const path = [current];
+
+        // startNode부터 시작하여 최종 메뉴까지의 경로를 무작위로 결정
+        while (true) {
+          const branch = current.querySelector(':scope > .branch');
+          if (!branch) break; // 자식 브랜치가 없으면(최종 메뉴) 중지
+
+          // 현재 단계의 선택지들이 보이도록 브랜치를 표시
+          branch.classList.add('visible');
+
+          const children = Array.from(branch.children).filter(c => c.classList.contains('node'));
+          if (children.length === 0) break; // 브랜치에 노드가 없으면 중지
+
+          // 다음 단계 노드를 무작위로 선택
+          const next = children[Math.floor(Math.random() * children.length)];
+          path.push(next);
+          current = next;
         }
-      }, 500);
-    }
+
+        // 결정된 경로를 따라 순차적으로 하이라이트 애니메이션 실행
+        let idx = 0;
+        const interval = setInterval(() => {
+          // 이전 단계의 하이라이트 제거 (첫 선택지는 유지)
+          if (idx > 0 && path[idx - 1] !== selectionStartNode) {
+            path[idx - 1].classList.remove('highlight');
+          }
+
+          // 현재 단계 노드 하이라이트
+          if (idx < path.length) {
+            path[idx].classList.add('highlight');
+            idx++;
+          } else {
+            clearInterval(interval);
+            // 최종 선택된 메뉴를 강조하고 결과 텍스트 표시
+            const finalChoice = path[path.length - 1];
+            finalChoice.classList.add('highlight');
+            resultDiv.innerHTML = `🎉 오늘은... <strong>${finalChoice.textContent.trim()}</strong>! 🎉`;
+          }
+        }, 700); // 애니메이션 간격
+      }
+    });
   </script>
 </body>
 </html>
