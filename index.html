@@ -1,413 +1,474 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🍽️ 윤이 오늘 뭐 먹지? (완성본)</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YH❤️SY Wine Album</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
   <style>
-    /* CSS 스타일은 이전과 거의 동일합니다. */
-    * { box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(to bottom right, #fff9f0, #ffe0e0); color: #333; padding: 1rem; margin: 0; }
-    .header-container { text-align: center; margin-bottom: 2rem; }
-    h1 { font-size: 2.5rem; line-height: 1.2; margin: 0 0 1rem 0; }
-    .tree { display: block; max-width: 800px; margin: 0 auto; padding: 1rem; background: #fff; border-radius: 1rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); position: relative; min-height: 150px; }
-    .node { position: relative; padding-left: 1rem; margin-bottom: 1rem; transition: background-color 0.3s ease, opacity 0.5s ease; display: flex; justify-content: space-between; align-items: center; }
-    .node-content { display: flex; align-items: center; gap: 0.5rem; }
-    .parent-node > .node-content { cursor: pointer; }
-    .toggle-icon { display: inline-block; width: 1em; transition: transform 0.2s ease-in-out; padding-right: 5px; }
-    .parent-node.expanded > .node-content .toggle-icon { transform: rotate(90deg); }
-    .branch { margin-left: 1.5rem; border-left: 2px dashed #ccc; padding-left: 1rem; display: none; }
-    .branch.visible { display: block; }
-    .choice-node { cursor: pointer; border-radius: 8px; }
-    .choice-node:hover { background-color: #fdf5e6; }
-    .selected { background-color: #e0f7fa; font-weight: bold; }
-    .unselected { opacity: 0.4; pointer-events: none; }
-    
-    /* [수정] 임시 제외 스타일 */
-    .temp-removed { opacity: 0.5; }
-    .temp-removed > .node-content .node-text { text-decoration: line-through; color: #aaa; }
-
-    .button-container { text-align: center; margin: 1.5rem 0; }
-    .action-button { margin: 0.25rem 0.5rem; padding: 0.75rem 1.5rem; font-size: 1rem; color: white; border: none; border-radius: 1rem; cursor: pointer; transition: all 0.3s ease; }
-    .action-button.start { background-color: #ff9a9e; }
-    .action-button.start:hover { background-color: #ff6a6a; transform: scale(1.05); }
-    .action-button.reset { background-color: #a0aec0; }
-    .action-button.reset:hover { background-color: #718096; transform: scale(1.05); }
-    .action-button.search { background-color: #f7e600; color: #3d1e1f; font-weight: bold;}
-    .action-button.search:hover { background-color: #e8d700; transform: scale(1.05); }
-    .action-button.edit { background-color: #f6ad55; }
-    .action-button.edit:hover { background-color: #ed8936; transform: scale(1.05); }
-    .result { text-align: center; margin-top: 1.5rem; font-size: 1.5rem; font-weight: bold; color: #d6336c; min-height: 2rem; }
-    .highlight { background-color: #fff3cd; border-radius: 4px; }
-    .hidden { display: none; }
-    .edit-controls { display: none; margin-left: 10px; }
-    .edit-mode .edit-controls { display: flex; gap: 5px; }
-    .edit-btn { background-color: #c8e6c9; color: #2e7d32; border: none; border-radius: 50%; width: 22px; height: 22px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
-    .delete-btn { background-color: #fed7d7; color: #c53030; border: none; border-radius: 50%; width: 22px; height: 22px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
-    .edit-btn:hover, .delete-btn:hover { transform: scale(1.1); }
-    .initial-setup { text-align: center; padding: 2rem; }
-    .link-container { text-align: center; margin-top: 1.5rem; }
-    .link-container a { color: #8c2a32; text-decoration: none; font-weight: bold; }
-    .link-container a:hover { text-decoration: underline; }
-    .result-link { display: block; margin-top: 0.5rem; font-size: 1rem; }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+    }
+    .tab-item.active {
+      color: #8c2a32;
+      font-weight: 600;
+      border-bottom-color: #8c2a32;
+    }
+    .modal-content, .add-modal-content {
+      transform: scale(0.95) translateY(10px);
+      opacity: 0;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.open .modal-content, .modal-overlay.open .add-modal-content {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+    .star-rating input:checked ~ label,
+    .star-rating label:hover ~ label {
+        color: #f59e0b; /* amber-500 */
+    }
   </style>
 </head>
-<body class="">
-  <div class="header-container">
-    <h1>🥢 윤이 뭐뭐 먹지?</h1>
-  </div>
+<body class="bg-stone-50 text-stone-800">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-stone-50/80 backdrop-blur-lg shadow-sm">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <h1 class="text-xl font-bold text-rose-900">
+          🍷 YH❤️SY Wine Album
+        </h1>
+        <button id="open-add-modal-btn" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-rose-900 hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-800">
+          새 와인 기록
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto p-4 md:p-8">
+    <!-- Tab Navigation -->
+    <div class="border-b border-stone-200 mb-6">
+        <nav id="main-tabs" class="flex space-x-8" aria-label="Tabs">
+            <button data-tab="my-wines" class="tab-item active text-stone-500 hover:text-rose-800 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">내 와인 목록</button>
+            <button data-tab="wishlist" class="tab-item text-stone-500 hover:text-rose-800 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">위시리스트</button>
+            <button data-tab="my-stats" class="tab-item text-stone-500 hover:text-rose-800 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">나의 통계</button>
+        </nav>
+    </div>
+
+    <!-- Tab Content -->
+    <div id="tab-content-container">
+        <!-- My Wines List -->
+        <div id="my-wines-content" class="tab-pane active">
+            <div id="wine-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 와인 기록이 여기에 표시됩니다. -->
+            </div>
+        </div>
+        <!-- Wishlist -->
+        <div id="wishlist-content" class="tab-pane hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <div class="lg:col-span-2">
+                    <form id="wish-form" class="space-y-4 p-6 bg-white rounded-lg shadow-sm">
+                        <h2 class="text-2xl font-bold text-stone-800">새로운 위시리스트</h2>
+                        <div>
+                            <label for="wish-name" class="text-sm font-medium text-stone-700">와인 이름</label>
+                            <input type="text" id="wish-name" placeholder="예: 로마네 콩티" required class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800">
+                        </div>
+                        <!-- [수정] 위시리스트에 종류/국가 선택 추가 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="wish-wine-type" class="text-sm font-medium text-stone-700">종류</label>
+                                <select id="wish-wine-type" class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800">
+                                    <option value="">선택 (선택사항)</option>
+                                    <option>레드</option><option>화이트</option><option>로제</option><option>스파클링</option><option>주정강화</option><option>기타</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="wish-wine-country" class="text-sm font-medium text-stone-700">국가</label>
+                                <select id="wish-wine-country" class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800">
+                                  <option value="">선택 (선택사항)</option>
+                                  <option>프랑스</option><option>이탈리아</option><option>스페인</option><option>미국</option><option>칠레</option><option>호주</option><option>아르헨티나</option><option>독일</option><option>뉴질랜드</option><option>남아공</option><option>기타</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="wish-reason" class="text-sm font-medium text-stone-700">마시고 싶은 이유 (선택사항)</label>
+                            <textarea id="wish-reason" rows="2" placeholder="전설적인 피노 누아를 경험해보고 싶다" class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800"></textarea>
+                        </div>
+                        <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-semibold rounded-md text-white bg-stone-700 hover:bg-stone-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-stone-600">위시리스트에 추가</button>
+                    </form>
+                </div>
+                <div id="wish-list-container" class="lg:col-span-3 space-y-3">
+                    <!-- 위시리스트가 여기에 표시됩니다. -->
+                </div>
+            </div>
+        </div>
+        <!-- My Stats -->
+        <div id="my-stats-content" class="tab-pane hidden">
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <div class="text-4xl font-bold text-rose-900" id="stats-total-wines">0</div>
+                    <div class="text-sm text-stone-500 mt-1">마신 와인</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <div class="text-4xl font-bold text-rose-900" id="stats-avg-rating">0.0</div>
+                    <div class="text-sm text-stone-500 mt-1">평균 별점</div>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <div class="text-4xl font-bold text-rose-900" id="stats-wish-count">0</div>
+                    <div class="text-sm text-stone-500 mt-1">위시리스트</div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </main>
   
-  <div class="tree" id="tree">
-    <p style="padding: 1rem; color: #888;">메뉴 데이터를 불러오는 중...</p>
+  <!-- 새 와인 기록 모달 -->
+  <div id="add-wine-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+    <div class="add-modal-content bg-stone-50 rounded-lg shadow-xl w-full max-w-lg max-h-full overflow-y-auto">
+        <form id="wine-form" class="p-8 space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-stone-800">새 와인 기록</h2>
+                <button type="button" id="close-add-modal-btn" class="text-stone-400 hover:text-stone-800">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <!-- Form content moved from main HTML -->
+            <div><label for="wine-name" class="text-sm font-medium text-stone-700">와인 이름</label><input type="text" id="wine-name" placeholder="예: 샤토 마고" required class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label for="wine-type" class="text-sm font-medium text-stone-700">종류</label><select id="wine-type" required class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800"><option value="">선택하세요</option><option>레드</option><option>화이트</option><option>로제</option><option>스파클링</option><option>주정강화</option><option>기타</option></select></div><div><label for="wine-country" class="text-sm font-medium text-stone-700">국가</label><select id="wine-country" required class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800"><option value="">선택하세요</option><option>프랑스</option><option>이탈리아</option><option>스페인</option><option>미국</option><option>칠레</option><option>호주</option><option>아르헨티나</option><option>독일</option><option>뉴질랜드</option><option>남아공</option><option>기타</option></select></div></div>
+            <div><label for="wine-date" class="text-sm font-medium text-stone-700">마신 날짜</label><input type="date" id="wine-date" required class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800"></div>
+            <div><label class="text-sm font-medium text-stone-700">나의 평점</label><div class="star-rating flex flex-row-reverse justify-end items-center mt-1"><input type="radio" id="5-stars" name="rating" value="5" class="hidden"/><label for="5-stars" class="text-3xl text-stone-300 cursor-pointer transition-colors hover:text-amber-500">★</label><input type="radio" id="4-stars" name="rating" value="4" class="hidden"/><label for="4-stars" class="text-3xl text-stone-300 cursor-pointer transition-colors hover:text-amber-500">★</label><input type="radio" id="3-stars" name="rating" value="3" class="hidden"/><label for="3-stars" class="text-3xl text-stone-300 cursor-pointer transition-colors hover:text-amber-500">★</label><input type="radio" id="2-stars" name="rating" value="2" class="hidden"/><label for="2-stars" class="text-3xl text-stone-300 cursor-pointer transition-colors hover:text-amber-500">★</label><input type="radio" id="1-star" name="rating" value="1" class="hidden" required/><label for="1-star" class="text-3xl text-stone-300 cursor-pointer transition-colors hover:text-amber-500">★</label></div></div>
+            <div><label class="text-sm font-medium text-stone-700">라벨 사진 (선택)</label><div id="image-drop-area" class="mt-1 flex justify-center items-center w-full h-32 px-6 border-2 border-stone-300 border-dashed rounded-md cursor-pointer hover:border-rose-800 bg-stone-50"><div class="space-y-1 text-center"><svg class="mx-auto h-12 w-12 text-stone-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg><div class="flex text-sm text-stone-600"><p class="pl-1">파일을 드래그하거나 클릭하여 업로드</p></div><p class="text-xs text-stone-500">PNG, JPG, GIF up to 10MB</p></div></div><input type="file" id="wine-image-upload" accept="image/*" class="hidden"><div id="image-preview-container" class="mt-2 hidden text-center"><img id="image-preview" class="rounded-md max-h-40 mx-auto" /><button type="button" id="remove-image-btn" class="mt-1 text-xs text-red-600 hover:underline">이미지 제거</button></div></div>
+            <div><label for="tasting-note" class="text-sm font-medium text-stone-700">테이스팅 노트</label><textarea id="tasting-note" rows="4" placeholder="진한 체리향과 부드러운 목넘김..." class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800"></textarea></div>
+            <button type="submit" id="submit-btn" class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-semibold rounded-md text-white bg-rose-900 hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-800 disabled:bg-stone-400 transition-colors">기록 저장하기</button>
+        </form>
+    </div>
   </div>
 
-  <div class="link-container">
-      <a href="wine.html" target="_blank">유니혀니 와인 앨범 관리하기 ↗</a>
+  <!-- 상세/수정 모달 (기존과 동일) -->
+  <div id="wine-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+    <div class="modal-content bg-stone-50 rounded-lg shadow-xl w-full max-w-md max-h-full overflow-y-auto">
+      <div class="p-6 relative">
+        <button id="modal-close" class="absolute top-4 right-4 text-stone-400 hover:text-stone-800">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <div id="modal-display-view">
+          <img id="modal-wine-image" src="" class="w-full h-48 object-cover rounded-lg mb-4 bg-stone-200">
+          <h2 id="modal-wine-name" class="text-2xl font-bold text-rose-900"></h2>
+          <p id="modal-wine-details" class="text-sm text-stone-500 mt-1"></p>
+          <div id="modal-tasting-note-display" class="mt-4 p-4 bg-white rounded-md text-sm text-stone-700 whitespace-pre-wrap"></div>
+          <div class="mt-6 flex space-x-3">
+            <button id="modal-edit-btn" class="flex-1 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-stone-700 hover:bg-stone-600">수정</button>
+            <button id="modal-delete-btn" class="flex-1 inline-flex justify-center py-2 px-4 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200">삭제</button>
+          </div>
+        </div>
+        <div id="modal-edit-view" class="hidden">
+           <h2 class="text-2xl font-bold text-rose-900 mb-4">와인 정보 수정</h2>
+           <form id="modal-edit-form" class="space-y-4">
+             <input type="hidden" id="modal-edit-id">
+             <div><label for="modal-edit-name" class="text-sm font-medium text-stone-700">와인 이름</label><input type="text" id="modal-edit-name" required class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800"></div>
+             <div><label for="modal-edit-date" class="text-sm font-medium text-stone-700">마신 날짜</label><input type="date" id="modal-edit-date" required class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800"></div>
+             <div><label for="modal-edit-note" class="text-sm font-medium text-stone-700">테이스팅 노트</label><textarea id="modal-edit-note" rows="5" class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm shadow-sm placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-rose-800 focus:border-rose-800"></textarea></div>
+             <div class="flex space-x-3">
+                <button type="button" id="modal-cancel-edit-btn" class="flex-1 inline-flex justify-center py-2 px-4 border border-stone-300 shadow-sm text-sm font-medium rounded-md text-stone-700 bg-white hover:bg-stone-50">취소</button>
+                <button type="submit" class="flex-1 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rose-900 hover:bg-rose-800">변경사항 저장</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="button-container hidden" id="button-container">
-      <button class="action-button edit" id="edit-button">✏️ 편집</button>
-      <button class="action-button start" id="start-selection-button">✨ 메뉴 결정 시작!</button>
-      <button class="action-button reset" id="reset-button">🔄 초기화</button>
-      <button class="action-button search hidden" id="kakaomap-button">📍 내 주변 맛집 검색</button>
-  </div>
-  <div class="result" id="result"></div>
 
 <script type="module">
+  // Firebase SDK 가져오기 - Storage 관련 모듈 추가
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-  import { getFirestore, collection, onSnapshot, query, addDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-storage.js";
 
+  // [수정] 사용자 Firebase 정보로 자동 설정
   const firebaseConfig = {
     apiKey: "AIzaSyC93injuuKFQbJPkX-qxf2KRXW4g_AhUFM",
     authDomain: "wineproject-ad606.firebaseapp.com",
     projectId: "wineproject-ad606",
-    storageBucket: "wineproject-ad606.appspot.com",
+    // 이 부분의 주소를 수정했습니다.
+    storageBucket: "wineproject-ad606.firebasestorage.app", 
     messagingSenderId: "27425674688",
     appId: "1:27425674688:web:48c83136045b6f2aa96425"
   };
-
+  
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const menuItemsCollection = collection(db, "menuItems");
+  const storage = getStorage(app); 
 
-  const body = document.body;
-  const treeContainer = document.getElementById('tree');
-  const editButton = document.getElementById('edit-button');
-  const startButton = document.getElementById('start-selection-button');
-  const resetButton = document.getElementById('reset-button');
-  const kakaoMapButton = document.getElementById('kakaomap-button');
-  const buttonContainer = document.getElementById('button-container');
-  const resultDiv = document.getElementById('result');
+  // --- 전역 변수 및 DOM 요소 ---
+  let wineDocsCache = [];
+  let currentEditingId = null;
+  const wineForm = document.getElementById('wine-form');
+  const wineListContainer = document.getElementById('wine-list-container');
+  const viewModal = document.getElementById('wine-modal');
+  const addModal = document.getElementById('add-wine-modal');
   
-  let selectionStartNodeName = null; // [수정] DOM 노드 대신 이름으로 상태 저장
-  let isEditMode = false;
-  let allMenuItems = [];
-
-  onSnapshot(query(menuItemsCollection), (snapshot) => {
-    allMenuItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  // --- 와인 기록 렌더링 ---
+  const tastedWinesCollection = collection(db, "wines");
+  onSnapshot(query(tastedWinesCollection, orderBy("date", "desc")), (snapshot) => {
+    wineDocsCache = snapshot.docs;
+    wineListContainer.innerHTML = '';
+    let totalRating = 0;
     
-    if (allMenuItems.length === 0 && !document.querySelector('.initial-setup')) {
-        renderInitialSetup();
-    } else if (allMenuItems.length > 0) {
-        renderTree(allMenuItems);
+    if (snapshot.empty) {
+        wineListContainer.innerHTML = `<div class="text-center p-8 bg-white rounded-lg shadow-sm col-span-1 md:col-span-2 lg:col-span-3"><p class="text-stone-500">아직 기록된 와인이 없네요.<br>첫 와인을 기록해보세요!</p></div>`;
     }
-  });
 
-  function renderInitialSetup() {
-    treeContainer.innerHTML = `
-        <div class="initial-setup">
-            <h3>😮 메뉴가 하나도 없네요!</h3>
-            <p>아래 버튼을 눌러 기본 메뉴를 생성하고 시작해 보세요.</p>
-            <button id="create-default-menus-btn" class="action-button start">기본 메뉴 생성하기</button>
+    snapshot.docs.forEach(doc => {
+      const wine = doc.data();
+      const ratingStars = '★'.repeat(wine.rating) + '<span class="text-stone-300">' + '★'.repeat(5 - wine.rating) + '</span>';
+      const imageUrl = wine.imageUrl || `https://placehold.co/200x200/f1e4d1/8c2a32?text=${wine.name.substring(0,1)}`;
+
+      const card = document.createElement('div');
+      card.className = "bg-white rounded-lg shadow-sm flex flex-col cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all group";
+      card.dataset.id = doc.id;
+      
+      card.innerHTML = `
+        <img src="${imageUrl}" alt="${wine.name}" class="w-full h-48 object-cover rounded-t-lg bg-stone-200">
+        <div class="p-4 flex flex-col flex-grow">
+            <p class="text-xs text-stone-500 group-hover:text-rose-800 transition-colors">${wine.country} / ${wine.type}</p>
+            <h3 class="font-bold text-stone-800 text-lg mt-1 flex-grow">${wine.name}</h3>
+            <div class="flex justify-between items-center mt-4">
+                <p class="text-xs text-stone-500">${wine.date}</p>
+                <div class="text-amber-400 text-xl" title="평점: ${wine.rating}">${ratingStars}</div>
+            </div>
         </div>
-    `;
-    document.getElementById('create-default-menus-btn').addEventListener('click', async (e) => {
-        e.target.disabled = true;
-        e.target.textContent = '생성 중...';
-        await createDefaultMenus();
+      `;
+      card.addEventListener('click', () => openModal(doc.id));
+      wineListContainer.appendChild(card);
+      totalRating += parseInt(wine.rating);
     });
-  }
 
-  async function createDefaultMenus() {
-    const defaultMenus = [
-        { name: '술을 먹는다', parent: 'root' }, { name: '술 안 먹는다', parent: 'root' },
-        { name: '소주', parent: '술을 먹는다' }, { name: '삼겹살', parent: '소주' }, { name: '감자탕', parent: '소주' },
-        { name: '맥주', parent: '술을 먹는다' }, { name: '치킨', parent: '맥주' }, { name: '피자', parent: '맥주' },
-        { name: '와인', parent: '술을 먹는다' }, { name: '스테이크', parent: '와인' }, { name: '파스타', parent: '와인' }, { name: '치즈', parent: '와인' },
-        { name: '막걸리', parent: '술을 먹는다' }, { name: '파전', parent: '막걸리' },
-        { name: '한식', parent: '술 안 먹는다' }, { name: '제육볶음', parent: '한식' }, { name: '김치찌개', parent: '한식' },
-        { name: '양식', parent: '술 안 먹는다' }, { name: '파스타', parent: '양식' }
-    ];
-    const batch = writeBatch(db);
-    defaultMenus.forEach(menu => batch.set(doc(menuItemsCollection), menu));
-    await batch.commit();
-  }
+    // 통계 업데이트
+    const wineCount = snapshot.size;
+    document.getElementById('stats-total-wines').textContent = wineCount;
+    document.getElementById('stats-avg-rating').textContent = wineCount > 0 ? (totalRating / wineCount).toFixed(1) : '0.0';
+  });
 
-  function renderTree(items) {
-      treeContainer.innerHTML = '';
-      const itemsByParent = items.reduce((acc, item) => {
-          (acc[item.parent] = acc[item.parent] || []).push(item);
-          return acc;
-      }, {});
-      const rootItems = itemsByParent['root'] || [];
-      rootItems.forEach(item => {
-          const nodeWrapper = createNodeElement(item, itemsByParent);
-          treeContainer.appendChild(nodeWrapper);
+  // --- 와인 기록 추가 ---
+  wineForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '저장 중...';
+
+    const file = document.getElementById('wine-image-upload').files[0];
+    let imageUrl = '';
+    let imagePath = '';
+
+    if (file) {
+      try {
+        imagePath = `wine-labels/${Date.now()}-${file.name}`;
+        const storageRef = ref(storage, imagePath);
+        const uploadResult = await uploadBytes(storageRef, file);
+        imageUrl = await getDownloadURL(uploadResult.ref);
+      } catch (error) {
+        alert('이미지 업로드 실패: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = '기록 저장하기';
+        return;
+      }
+    }
+
+    try {
+      await addDoc(tastedWinesCollection, {
+        name: wineForm['wine-name'].value,
+        type: wineForm['wine-type'].value,
+        country: wineForm['wine-country'].value,
+        date: wineForm['wine-date'].value,
+        rating: parseInt(wineForm['rating'].value),
+        note: wineForm['tasting-note'].value,
+        imageUrl,
+        imagePath
       });
-
-      // [수정] 편집 후에도 선택 상태 복원
-      if (selectionStartNodeName) {
-        const selectedNode = treeContainer.querySelector(`.node[data-name="${selectionStartNodeName}"]`);
-        const otherNodeName = selectionStartNodeName === '술을 먹는다' ? '술 안 먹는다' : '술을 먹는다';
-        const otherNode = treeContainer.querySelector(`.node[data-name="${otherNodeName}"]`);
-        if (selectedNode && otherNode) {
-            makeChoice(selectedNode, otherNode);
-        }
-      }
-  }
+      wineForm.reset();
+      resetImageUpload();
+      addModal.classList.add('hidden');
+    } catch (error) {
+      alert('데이터 저장 실패: ' + error.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '기록 저장하기';
+    }
+  });
   
-  function createNodeElement(item, itemsByParent) {
-    const nodeWrapper = document.createElement('div');
-    const node = document.createElement('div');
-    node.className = 'node';
-    node.dataset.id = item.id;
-    node.dataset.name = item.name;
+  // --- 위시리스트 로직 ---
+  const wishForm = document.getElementById('wish-form');
+  const wishListContainer = document.getElementById('wish-list-container');
+  const wishesCollection = collection(db, "wishes");
+  onSnapshot(query(wishesCollection, orderBy("createdAt", "desc")), (snapshot) => {
+    wishListContainer.innerHTML = '';
+    if(!snapshot.empty) {
+        const title = document.createElement('h3');
+        title.className = "text-2xl font-bold text-stone-800";
+        title.textContent = "My Wishlist";
+        wishListContainer.appendChild(title);
+    }
+    snapshot.docs.forEach(doc => {
+        const wish = doc.data();
+        const card = document.createElement('div');
+        card.className = "bg-white p-4 rounded-lg shadow-sm flex items-center justify-between";
+        // [수정] 위시리스트 카드에 종류/국가 표시
+        const typeAndCountry = [wish.country, wish.type].filter(Boolean).join(' / ');
+        card.innerHTML = `
+          <div>
+            ${typeAndCountry ? `<p class="text-xs text-stone-500">${typeAndCountry}</p>` : ''}
+            <p class="font-semibold text-stone-700 ${typeAndCountry ? 'mt-1' : ''}">${wish.name}</p>
+            <p class="text-sm text-stone-500 mt-1">${wish.reason || '마시고 싶은 와인'}</p>
+          </div>
+          <button data-id="${doc.id}" class="wish-delete-btn text-stone-400 hover:text-red-600 transition-colors p-2 text-xl">&times;</button>
+        `;
+        wishListContainer.appendChild(card);
+    });
+    document.getElementById('stats-wish-count').textContent = snapshot.size;
+  });
+  // [수정] 위시리스트 추가 로직
+  wishForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await addDoc(wishesCollection, {
+        name: wishForm['wish-name'].value,
+        type: wishForm['wish-wine-type'].value,
+        country: wishForm['wish-wine-country'].value,
+        reason: wishForm['wish-reason'].value,
+        createdAt: new Date() 
+    });
+    wishForm.reset();
+  });
+  wishListContainer.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('wish-delete-btn')) {
+      if (confirm("이 항목을 위시리스트에서 삭제하시겠습니까?")) {
+        await deleteDoc(doc(db, "wishes", e.target.dataset.id));
+      }
+    }
+  });
 
-    const nodeContent = document.createElement('div');
-    nodeContent.className = 'node-content';
-    const nodeText = document.createElement('span');
-    nodeText.className = 'node-text';
-    nodeText.innerHTML = item.parent === 'root' ? `<strong>${item.name}</strong>` : item.name;
-    nodeContent.appendChild(nodeText);
-    node.appendChild(nodeContent);
 
-    const children = itemsByParent[item.name] || [];
-    const isParentNode = children.length > 0;
+  // --- 모달 로직 ---
+  function openModal(docId) {
+    currentEditingId = docId;
+    const wineDoc = wineDocsCache.find(doc => doc.id === docId);
+    if (!wineDoc) return;
+    const wine = wineDoc.data();
+
+    const ratingStars = '★'.repeat(wine.rating) + '<span class="text-stone-300">' + '★'.repeat(5 - wine.rating) + '</span>';
+    viewModal.querySelector('#modal-wine-image').src = wine.imageUrl || 'https://placehold.co/500x200/f1e4d1/8c2a32?text=No+Image';
+    viewModal.querySelector('#modal-wine-name').textContent = wine.name;
+    viewModal.querySelector('#modal-wine-details').innerHTML = `${wine.country} / ${wine.type} &middot; ${wine.date} &middot; <span class="text-amber-400">${ratingStars}</span>`;
+    viewModal.querySelector('#modal-tasting-note-display').textContent = wine.note || '작성된 노트가 없습니다.';
     
-    // [수정] 편집 컨트롤 UI 생성 로직 단순화
-    const editControls = document.createElement('div');
-    editControls.className = 'edit-controls';
-    if (isParentNode) {
-        const addButton = document.createElement('button');
-        addButton.className = 'edit-btn';
-        addButton.textContent = '+';
-        addButton.title = '하위 메뉴 추가';
-        editControls.appendChild(addButton);
-    }
-    const deleteButton = document.createElement('button');
-    deleteButton.className = 'delete-btn';
-    deleteButton.textContent = '×';
-    deleteButton.title = '이번 추천에서 제외하기';
-    if (item.parent !== 'root') {
-      editControls.appendChild(deleteButton);
-    }
-    node.appendChild(editControls);
-    nodeWrapper.appendChild(node);
-
-    if (isParentNode) {
-        node.classList.add('parent-node');
-        const toggleIcon = document.createElement('span');
-        toggleIcon.className = 'toggle-icon';
-        toggleIcon.textContent = '▶';
-        nodeContent.insertBefore(toggleIcon, nodeText);
-        const branch = document.createElement('div');
-        branch.className = 'branch';
-        children.forEach(child => {
-            branch.appendChild(createNodeElement(child, itemsByParent));
-        });
-        nodeWrapper.appendChild(branch);
-    }
-    addNodeEventListeners(nodeWrapper);
-    return nodeWrapper;
-  }
-
-  function addNodeEventListeners(nodeWrapper) {
-      const node = nodeWrapper.querySelector('.node');
-      const nodeContent = node.querySelector('.node-content');
-      const parentName = node.dataset.name;
-
-      if(node.classList.contains('parent-node')){
-        nodeContent.addEventListener('click', () => {
-            if(!isEditMode) toggleNode(node);
-        });
-      }
-      
-      if (parentName === '술을 먹는다' || parentName === '술 안 먹는다') {
-          node.classList.add('choice-node');
-          node.addEventListener('click', () => {
-              if (isEditMode) return;
-              const otherChoiceName = parentName === '술을 먹는다' ? '술 안 먹는다' : '술을 먹는다';
-              const otherNode = treeContainer.querySelector(`.node[data-name="${otherChoiceName}"]`);
-              makeChoice(node, otherNode);
-          });
-      }
-
-      const addBtn = node.querySelector('.edit-btn');
-      if (addBtn) {
-          addBtn.addEventListener('click', (e) => {
-              e.stopPropagation();
-              const newMenuNamesString = prompt(`'${parentName}'의 하위 메뉴를 콤마(,)로 구분하여 입력하세요.`);
-              if (newMenuNamesString) {
-                  const menuNames = newMenuNamesString.split(',').map(s => s.trim()).filter(Boolean);
-                  const batch = writeBatch(db);
-                  menuNames.forEach(name => {
-                      batch.set(doc(menuItemsCollection), { name, parent: parentName });
-                  });
-                  batch.commit();
-              }
-          });
-      }
-      
-      const deleteBtn = node.querySelector('.delete-btn');
-      if (deleteBtn) {
-          // [수정] 삭제 버튼 로직 변경
-          deleteBtn.addEventListener('click', (e) => {
-              e.stopPropagation();
-              node.classList.toggle('temp-removed');
-              deleteBtn.innerHTML = node.classList.contains('temp-removed') ? '&#43;' : '&times;';
-              deleteBtn.title = node.classList.contains('temp-removed') ? '추천에 다시 포함하기' : '이번 추천에서 제외하기';
-          });
-      }
+    viewModal.querySelector('#modal-display-view').classList.remove('hidden');
+    viewModal.querySelector('#modal-edit-view').classList.add('hidden');
+    viewModal.classList.remove('hidden');
+    setTimeout(() => viewModal.classList.add('open'), 10);
   }
   
-  function toggleNode(node, forceExpand) {
-      const branch = node.parentElement.querySelector('.branch');
-      if (!branch) return;
-      const isExpanded = node.classList.contains('expanded');
-      const shouldBeVisible = forceExpand === undefined ? !isExpanded : forceExpand;
-      node.classList.toggle('expanded', shouldBeVisible);
-      branch.classList.toggle('visible', shouldBeVisible);
-      const icon = node.querySelector('.toggle-icon');
-      if(icon) {
-          icon.style.transform = shouldBeVisible ? 'rotate(90deg)' : 'rotate(0deg)';
-      }
-  }
-  
-  function makeChoice(selectedNode, unselectedNode) {
-    selectedNode.classList.add('selected');
-    unselectedNode.classList.add('unselected');
-    document.querySelectorAll('.choice-node').forEach(n => n.style.pointerEvents = 'none');
-    toggleNode(selectedNode, true); 
-    selectionStartNodeName = selectedNode.dataset.name; // 이름으로 저장
-    buttonContainer.classList.remove('hidden');
-    const choiceText = selectedNode.dataset.name === '술을 먹는다' ? '술과 안주' : '메뉴';
-    startButton.textContent = `✨ 오늘의 ${choiceText} 결정!`;
-  }
-  
-  editButton.addEventListener('click', () => {
-      isEditMode = !isEditMode;
-      body.classList.toggle('edit-mode');
-      editButton.innerHTML = isEditMode ? '✅ 완료' : '✏️ 편집';
+  document.getElementById('open-add-modal-btn').addEventListener('click', () => {
+    addModal.classList.remove('hidden');
+    setTimeout(() => addModal.classList.add('open'), 10);
+  });
+  document.getElementById('close-add-modal-btn').addEventListener('click', () => {
+    addModal.classList.add('hidden');
+    addModal.classList.remove('open');
   });
 
-  resetButton.addEventListener('click', () => resetUIState(true));
-  startButton.addEventListener('click', () => {
-    const startNode = treeContainer.querySelector(`.node[data-name="${selectionStartNodeName}"]`);
-    if (!startNode) return;
-    buttonContainer.classList.add('hidden');
-    simulateStepByStep(startNode);
+  document.getElementById('modal-close').addEventListener('click', () => viewModal.classList.add('hidden'));
+  document.getElementById('modal-edit-btn').addEventListener('click', () => {
+    const wineDoc = wineDocsCache.find(doc => doc.id === currentEditingId); if (!wineDoc) return;
+    const wine = wineDoc.data();
+    viewModal.querySelector('#modal-edit-id').value = currentEditingId;
+    viewModal.querySelector('#modal-edit-name').value = wine.name;
+    viewModal.querySelector('#modal-edit-date').value = wine.date;
+    viewModal.querySelector('#modal-edit-note').value = wine.note;
+    viewModal.querySelector('#modal-display-view').classList.add('hidden');
+    viewModal.querySelector('#modal-edit-view').classList.remove('hidden');
+  });
+
+  document.getElementById('modal-edit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const docRef = doc(db, "wines", currentEditingId);
+    await updateDoc(docRef, {
+      name: viewModal.querySelector('#modal-edit-name').value,
+      date: viewModal.querySelector('#modal-edit-date').value,
+      note: viewModal.querySelector('#modal-edit-note').value
+    });
+    viewModal.classList.add('hidden');
+  });
+
+  document.getElementById('modal-cancel-edit-btn').addEventListener('click', () => {
+    viewModal.querySelector('#modal-display-view').classList.remove('hidden');
+    viewModal.querySelector('#modal-edit-view').classList.add('hidden');
   });
   
-  function simulateStepByStep(startNode) {
-    let current = startNode;
-    const path = [current];
-    while (true) {
-        let branch = current.parentElement.querySelector('.branch');
-        if (!branch) break;
-        
-        // [수정] 제외 필터링 로직 변경
-        let availableChildren = Array.from(branch.querySelectorAll(':scope > div > .node')).filter(c => !c.classList.contains('temp-removed'));
-        
-        if (availableChildren.length === 0) {
-            resultDiv.textContent = `🤔 '${current.dataset.name}' 카테고리 메뉴가 모두 제외되었어요!`;
-            buttonContainer.classList.remove('hidden');
-            return;
-        }
-        const next = availableChildren[Math.floor(Math.random() * availableChildren.length)];
-        path.push(next);
-        current = next;
-    }
-    
-    path.forEach(ensurePathVisible);
-    let idx = 0;
-    const interval = setInterval(() => {
-        if (idx > 0 && path[idx - 1] !== startNode) path[idx - 1].classList.remove('highlight');
-        if (idx < path.length) {
-            path[idx].classList.add('highlight');
-            idx++;
-        } else {
-            clearInterval(interval);
-            const finalChoice = path[path.length - 1];
-            const finalText = finalChoice.querySelector('.node-text').textContent.trim();
-            finalChoice.classList.add('highlight');
-            
-            let resultHTML = `🎉 오늘은... <strong>${finalText}</strong>!`;
-
-            if (isWineRelated(finalChoice.dataset.name, allMenuItems)) {
-                resultHTML += `<a href="wine.html" class="result-link" target="_blank">유니혀니 와인 앨범에서 어울리는 와인 찾아보기 🍷</a>`;
-            }
-
-            resultDiv.innerHTML = resultHTML;
-            kakaoMapButton.dataset.food = finalText;
-            buttonContainer.classList.remove('hidden');
-            kakaoMapButton.classList.remove('hidden');
-        }
-    }, 700);
-  }
-
-  function isWineRelated(itemName, allItems) {
-      let current = allItems.find(item => item.name === itemName);
-      while(current) {
-          if (current.name === '와인') return true;
-          current = allItems.find(item => item.name === current.parent);
+  document.getElementById('modal-delete-btn').addEventListener('click', async () => {
+    if (confirm("정말로 이 와인 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+      const wineDoc = wineDocsCache.find(doc => doc.id === currentEditingId);
+      if (wineDoc && wineDoc.data().imagePath) {
+        const imageRef = ref(storage, wineDoc.data().imagePath);
+        await deleteObject(imageRef).catch(err => console.error("이미지 파일 삭제 오류:", err));
       }
-      return false;
-  }
-
-  function ensurePathVisible(node) {
-    let current = node.parentElement.closest('.branch');
-    while (current) {
-        const parentNode = current.previousElementSibling;
-        if (parentNode && parentNode.classList.contains('node') && !parentNode.classList.contains('expanded')) {
-            toggleNode(parentNode, true);
-        }
-        current = current.parentElement.closest('.branch');
+      await deleteDoc(doc(db, "wines", currentEditingId));
+      viewModal.classList.add('hidden');
     }
-  }
-
-  function resetUIState(fullReset) {
-    document.querySelectorAll('.highlight, .selected, .unselected, .temp-removed').forEach(n => n.classList.remove('highlight', 'selected', 'unselected', 'temp-removed'));
-    document.querySelectorAll('.choice-node').forEach(n => n.style.pointerEvents = 'auto');
-    document.querySelectorAll('.delete-btn').forEach(btn => { btn.innerHTML = '&times;'; });
-    resultDiv.innerHTML = '';
-    buttonContainer.classList.add('hidden');
-    kakaoMapButton.classList.add('hidden');
-    selectionStartNodeName = null;
-    if(fullReset) {
-        document.querySelectorAll('.branch.visible').forEach(b => b.classList.remove('visible'));
-        document.querySelectorAll('.node.expanded').forEach(n => n.classList.remove('expanded'));
-    }
-  }
-
-  kakaoMapButton.addEventListener('click', () => {
-    const foodName = kakaoMapButton.dataset.food;
-    if (!foodName) return;
-    resultDiv.innerHTML = '위치 정보 가져오는 중... <div class="loading-spinner"></div>';
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const query = encodeURIComponent(foodName.split(' ')[0]);
-        const url = `https://map.kakao.com/link/search/${query}`;
-        window.open(url, '_blank');
-        resultDiv.textContent = `✅ '${foodName}' 주변 맛집을 카카오맵에서 확인하세요!`;
-      },
-      () => {
-        resultDiv.textContent = '위치 정보를 가져올 수 없어, 기본 검색을 실행합니다.';
-        const query = encodeURIComponent(foodName.split(' ')[0]);
-        const url = `https://map.kakao.com/link/search/${query}`;
-        window.open(url, '_blank');
-      }
-    );
   });
+
+  // --- 이미지 업로드 UI 로직 ---
+  const dropArea = document.getElementById('image-drop-area');
+  const fileInput = document.getElementById('wine-image-upload');
+  const previewContainer = document.getElementById('image-preview-container');
+  const previewImage = document.getElementById('image-preview');
+  dropArea.addEventListener('click', () => fileInput.click());
+  dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('border-rose-800', 'bg-rose-50'); });
+  dropArea.addEventListener('dragleave', () => dropArea.classList.remove('border-rose-800', 'bg-rose-50'));
+  dropArea.addEventListener('drop', (e) => {
+    e.preventDefault(); dropArea.classList.remove('border-rose-800', 'bg-rose-50');
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      handleFile(e.dataTransfer.files[0]);
+    }
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+  function handleFile(file) {
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImage.src = e.target.result;
+        previewContainer.classList.remove('hidden');
+        dropArea.classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  document.getElementById('remove-image-btn').addEventListener('click', resetImageUpload);
+  function resetImageUpload() {
+      fileInput.value = '';
+      previewImage.src = '';
+      previewContainer.classList.add('hidden');
+      dropArea.classList.remove('hidden');
+  }
+
+  // --- 탭 로직 ---
+  const tabs = document.getElementById('main-tabs');
+  const tabPanes = document.querySelectorAll('.tab-pane');
+  tabs.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON') {
+          const targetPaneId = e.target.dataset.tab;
+          
+          tabs.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+          e.target.classList.add('active');
+
+          tabPanes.forEach(pane => {
+              pane.classList.toggle('hidden', pane.id !== `${targetPaneId}-content`);
+          });
+      }
+  });
+
 </script>
 </body>
 </html>
