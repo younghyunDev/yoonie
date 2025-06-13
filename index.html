@@ -3,64 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🍽️ 윤이 뭐뭐 먹지?</title>
+  <title>🍽️ 윤이 오늘 뭐 먹지? (완성본)</title>
   <style>
+    /* CSS 스타일은 이전과 거의 동일합니다. */
     * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom right, #fff9f0, #ffe0e0);
-      color: #333;
-      padding: 1rem;
-      margin: 0;
-    }
-    .header-container {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    h1 {
-      font-size: 2.5rem;
-      line-height: 1.2;
-      margin: 0 0 1rem 0;
-    }
-    .tree {
-      display: block; max-width: 800px; margin: 0 auto; padding: 1rem;
-      background: #fff; border-radius: 1rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      position: relative;
-    }
-    .node {
-      position: relative; padding-left: 1rem; margin-bottom: 1rem;
-      transition: background-color 0.3s ease, opacity 0.5s ease;
-      display: flex; justify-content: space-between; align-items: center;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(to bottom right, #fff9f0, #ffe0e0); color: #333; padding: 1rem; margin: 0; }
+    .header-container { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: 2.5rem; line-height: 1.2; margin: 0 0 1rem 0; }
+    .tree { display: block; max-width: 800px; margin: 0 auto; padding: 1rem; background: #fff; border-radius: 1rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); position: relative; min-height: 150px; }
+    .node { position: relative; padding-left: 1rem; margin-bottom: 1rem; transition: background-color 0.3s ease, opacity 0.5s ease; display: flex; justify-content: space-between; align-items: center; }
     .node-content { display: flex; align-items: center; gap: 0.5rem; }
-    .node-text::before {
-      content: ''; /* Removed emoji */
-      position: absolute; left: 0; top: 50%;
-      transform: translateY(-50%);
-    }
     .parent-node > .node-content { cursor: pointer; }
-    .toggle-icon {
-      display: inline-block; width: 1em; transition: transform 0.2s ease-in-out;
-      padding-right: 5px;
-    }
+    .toggle-icon { display: inline-block; width: 1em; transition: transform 0.2s ease-in-out; padding-right: 5px; }
     .parent-node.expanded > .node-content .toggle-icon { transform: rotate(90deg); }
-    .branch {
-      margin-left: 1.5rem; border-left: 2px dashed #ccc; padding-left: 1rem;
-      display: none;
-    }
+    .branch { margin-left: 1.5rem; border-left: 2px dashed #ccc; padding-left: 1rem; display: none; }
     .branch.visible { display: block; }
     .choice-node { cursor: pointer; border-radius: 8px; }
     .choice-node:hover { background-color: #fdf5e6; }
     .selected { background-color: #e0f7fa; font-weight: bold; }
     .unselected { opacity: 0.4; pointer-events: none; }
-    .removed .node-text { text-decoration: line-through; color: #aaa; }
-    .removed { opacity: 0.6; }
+    
+    /* [수정] 임시 제외 스타일 */
+    .temp-removed { opacity: 0.5; }
+    .temp-removed > .node-content .node-text { text-decoration: line-through; color: #aaa; }
+
     .button-container { text-align: center; margin: 1.5rem 0; }
-    .action-button {
-      margin: 0.25rem 0.5rem; padding: 0.75rem 1.5rem; font-size: 1rem;
-      color: white; border: none; border-radius: 1rem; cursor: pointer;
-      transition: all 0.3s ease;
-    }
+    .action-button { margin: 0.25rem 0.5rem; padding: 0.75rem 1.5rem; font-size: 1rem; color: white; border: none; border-radius: 1rem; cursor: pointer; transition: all 0.3s ease; }
     .action-button.start { background-color: #ff9a9e; }
     .action-button.start:hover { background-color: #ff6a6a; transform: scale(1.05); }
     .action-button.reset { background-color: #a0aec0; }
@@ -69,34 +37,19 @@
     .action-button.search:hover { background-color: #e8d700; transform: scale(1.05); }
     .action-button.edit { background-color: #f6ad55; }
     .action-button.edit:hover { background-color: #ed8936; transform: scale(1.05); }
-    .result {
-      text-align: center; margin-top: 1.5rem; font-size: 1.5rem;
-      font-weight: bold; color: #d6336c; min-height: 2rem;
-    }
+    .result { text-align: center; margin-top: 1.5rem; font-size: 1.5rem; font-weight: bold; color: #d6336c; min-height: 2rem; }
     .highlight { background-color: #fff3cd; border-radius: 4px; }
     .hidden { display: none; }
-    .remove-btn {
-      background-color: #fed7d7; color: #c53030; border: none; border-radius: 50%;
-      width: 22px; height: 22px; font-size: 14px; font-weight: bold;
-      line-height: 22px; text-align: center; cursor: pointer; margin-left: 10px;
-      flex-shrink: 0; transition: all 0.2s; display: none;
-    }
-    .edit-mode .remove-btn { display: block; }
-    .remove-btn:hover { background-color: #fbb6b6; }
-    .node.removed .remove-btn { background-color: #c8e6c9; color: #2e7d32; }
-    .loading-spinner {
-        border: 4px solid #f3f3f3; border-top: 4px solid #3d1e1f;
-        border-radius: 50%; width: 20px; height: 20px;
-        animation: spin 1s linear infinite; display: inline-block;
-        margin-left: 10px; vertical-align: middle;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    @media (max-width: 600px) {
-      h1 { font-size: 2rem; }
-      .node { font-size: 0.95rem; }
-      .result { font-size: 1.3rem; }
-    }
+    .edit-controls { display: none; margin-left: 10px; }
+    .edit-mode .edit-controls { display: flex; gap: 5px; }
+    .edit-btn { background-color: #c8e6c9; color: #2e7d32; border: none; border-radius: 50%; width: 22px; height: 22px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .delete-btn { background-color: #fed7d7; color: #c53030; border: none; border-radius: 50%; width: 22px; height: 22px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .edit-btn:hover, .delete-btn:hover { transform: scale(1.1); }
+    .initial-setup { text-align: center; padding: 2rem; }
+    .link-container { text-align: center; margin-top: 1.5rem; }
+    .link-container a { color: #8c2a32; text-decoration: none; font-weight: bold; }
+    .link-container a:hover { text-decoration: underline; }
+    .result-link { display: block; margin-top: 0.5rem; font-size: 1rem; }
   </style>
 </head>
 <body class="">
@@ -105,88 +58,11 @@
   </div>
   
   <div class="tree" id="tree">
-    <!-- Tree HTML structure remains the same -->
-    <div class="node" id="root-node">
-        <div class="node-content"><span class="node-text">❓ 술을 먹을 것인가?</span></div>
-    </div>
-      <div class="branch visible">
-        <div class="node choice-node" id="choice-yes">
-          <div class="node-content"><span class="node-text">🍶 <strong>Yes!</strong> 술을 먹는다</span></div>
-        </div>
-          <div class="branch">
-            <div class="node parent-node"><div class="node-content"><span class="node-text">🍶 소주</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">삼겹살</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">감자탕</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">회</span></div></div>
-              </div>
-            <div class="node parent-node"><div class="node-content"><span class="node-text">🍺 맥주</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">치킨</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">피자</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">감바스</span></div></div>
-              </div>
-            <div class="node parent-node"><div class="node-content"><span class="node-text">🍷 와인</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">치즈</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">파스타</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">스테이크</span></div></div>
-              </div>
-             <div class="node parent-node"><div class="node-content"><span class="node-text">🍶 막걸리</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">파전</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">도토리묵</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">전골</span></div></div>
-              </div>
-             <div class="node parent-node"><div class="node-content"><span class="node-text">🍹 칵테일</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">나쵸</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">타파스</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">해산물</span></div></div>
-              </div>
-            <div class="node parent-node"><div class="node-content"><span class="node-text">🍶 고량주</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">훠궈</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">양꼬치</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">마라샹궈</span></div></div>
-              </div>
-          </div>
-        <div class="node choice-node" id="choice-no">
-          <div class="node-content"><span class="node-text">🚫 <strong>No!</strong> 술 안 먹는다</span></div>
-        </div>
-          <div class="branch">
-            <div class="node parent-node"><div class="node-content"><span class="node-text">🍚 한식</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">국밥</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">제육볶음</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">비빔밥</span></div></div>
-              </div>
-            <div class="node parent-node"><div class="node-content"><span class="node-text">🥡 중식</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">짜장면</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">탕수육</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">마라탕</span></div></div>
-              </div>
-            <div class="node parent-node"><div class="node-content"><span class="node-text">🍣 일식</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">돈카츠</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">초밥</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">우동</span></div></div>
-              </div>
-            <div class="node parent-node"><div class="node-content"><span class="node-text">🍝 양식</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">파스타</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">리조또</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">스테이크</span></div></div>
-              </div>
-            <div class="node parent-node"><div class="node-content"><span class="node-text">🍢 분식</span></div></div>
-              <div class="branch">
-                <div class="node"><div class="node-content"><span class="node-text">떡볶이</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">순대</span></div></div>
-                <div class="node"><div class="node-content"><span class="node-text">김밥</span></div></div>
-              </div>
-          </div>
-      </div>
+    <p style="padding: 1rem; color: #888;">메뉴 데이터를 불러오는 중...</p>
+  </div>
+
+  <div class="link-container">
+      <a href="wine.html" target="_blank">유니혀니 와인 앨범 관리하기 ↗</a>
   </div>
 
   <div class="button-container hidden" id="button-container">
@@ -197,198 +73,341 @@
   </div>
   <div class="result" id="result"></div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const body = document.body;
-        const editButton = document.getElementById('edit-button');
-        const startButton = document.getElementById('start-selection-button');
-        const resetButton = document.getElementById('reset-button');
-        const kakaoMapButton = document.getElementById('kakaomap-button');
-        const buttonContainer = document.getElementById('button-container');
-        const resultDiv = document.getElementById('result');
-        
-        let selectionStartNode = null;
-        let isEditMode = false;
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+  import { getFirestore, collection, onSnapshot, query, addDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
-        function setupNodes() {
-            document.querySelectorAll('.node').forEach(node => {
-                const nextBranch = findNextSibling(node, '.branch');
-                if (nextBranch) {
-                    node.classList.add('parent-node');
-                    const nodeContent = node.querySelector('.node-content');
-                    if (!nodeContent.querySelector('.toggle-icon')) {
-                        const toggleIcon = document.createElement('span');
-                        toggleIcon.className = 'toggle-icon';
-                        toggleIcon.textContent = '▶';
-                        nodeContent.insertBefore(toggleIcon, nodeContent.firstChild);
-                        nodeContent.addEventListener('click', () => {
-                            if (node.classList.contains('choice-node') && !isEditMode) return;
-                            toggleNode(node);
-                        });
-                    }
-                }
+  const firebaseConfig = {
+    apiKey: "AIzaSyC93injuuKFQbJPkX-qxf2KRXW4g_AhUFM",
+    authDomain: "wineproject-ad606.firebaseapp.com",
+    projectId: "wineproject-ad606",
+    storageBucket: "wineproject-ad606.appspot.com",
+    messagingSenderId: "27425674688",
+    appId: "1:27425674688:web:48c83136045b6f2aa96425"
+  };
 
-                if (!node.classList.contains('choice-node') && node.id !== 'root-node') {
-                     if (!node.querySelector('.remove-btn')) {
-                        const removeBtn = document.createElement('button');
-                        removeBtn.className = 'remove-btn';
-                        removeBtn.innerHTML = '&times;';
-                        node.appendChild(removeBtn);
-                        removeBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            node.classList.toggle('removed');
-                            removeBtn.innerHTML = node.classList.contains('removed') ? '&#43;' : '&times;';
-                        });
-                    }
-                }
-            });
-        }
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const menuItemsCollection = collection(db, "menuItems");
 
-        function toggleNode(node, forceExpand = false) {
-            const nextBranch = findNextSibling(node, '.branch');
-            if (!nextBranch) return;
+  const body = document.body;
+  const treeContainer = document.getElementById('tree');
+  const editButton = document.getElementById('edit-button');
+  const startButton = document.getElementById('start-selection-button');
+  const resetButton = document.getElementById('reset-button');
+  const kakaoMapButton = document.getElementById('kakaomap-button');
+  const buttonContainer = document.getElementById('button-container');
+  const resultDiv = document.getElementById('result');
+  
+  let selectionStartNodeName = null; // [수정] DOM 노드 대신 이름으로 상태 저장
+  let isEditMode = false;
+  let allMenuItems = [];
 
-            const isExpanded = node.classList.contains('expanded');
-            if (forceExpand && isExpanded) return;
-            
-            node.classList.toggle('expanded', forceExpand || !isExpanded);
-            nextBranch.classList.toggle('visible', forceExpand || !isExpanded);
-            const icon = node.querySelector('.toggle-icon');
-            if(icon) {
-                 icon.style.transform = (forceExpand || !isExpanded) ? 'rotate(90deg)' : 'rotate(0deg)';
-            }
-        }
+  onSnapshot(query(menuItemsCollection), (snapshot) => {
+    allMenuItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    if (allMenuItems.length === 0 && !document.querySelector('.initial-setup')) {
+        renderInitialSetup();
+    } else if (allMenuItems.length > 0) {
+        renderTree(allMenuItems);
+    }
+  });
 
-        function makeChoice(selectedNode, unselectedNode) {
-            selectedNode.classList.add('selected');
-            unselectedNode.classList.add('unselected');
-            document.getElementById('choice-yes').style.pointerEvents = 'none';
-            document.getElementById('choice-no').style.pointerEvents = 'none';
-            toggleNode(selectedNode, true);
-            selectionStartNode = selectedNode;
-            buttonContainer.classList.remove('hidden');
-            const choiceText = selectedNode.id === 'choice-yes' ? '술과 안주' : '메뉴';
-            startButton.textContent = `✨ 오늘의 ${choiceText} 결정!`;
-        }
-        
-        document.getElementById('choice-yes').addEventListener('click', () => makeChoice(document.getElementById('choice-yes'), document.getElementById('choice-no')));
-        document.getElementById('choice-no').addEventListener('click', () => makeChoice(document.getElementById('choice-no'), document.getElementById('choice-yes')));
-        
-        editButton.addEventListener('click', () => {
-            isEditMode = !isEditMode;
-            body.classList.toggle('edit-mode');
-            editButton.innerHTML = isEditMode ? '✅ 완료' : '✏️ 편집';
-        });
-
-        startButton.addEventListener('click', () => {
-            if (!selectionStartNode) return;
-            resetUIState();
-            buttonContainer.classList.add('hidden');
-            simulateStepByStep(selectionStartNode);
-        });
-
-        resetButton.addEventListener('click', () => {
-            location.reload();
-        });
-
-        kakaoMapButton.addEventListener('click', () => {
-            const foodName = kakaoMapButton.dataset.food;
-            if (!foodName) return;
-
-            resultDiv.innerHTML = '위치 정보 가져오는 중... <div class="loading-spinner"></div>';
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    const query = encodeURIComponent(foodName.split(' ')[0]);
-                    
-                    const url = `https://map.kakao.com/link/search/${query}`;
-                    
-                    window.open(url, '_blank');
-                    resultDiv.textContent = `✅ '${foodName}' 주변 맛집을 카카오맵에서 확인하세요!`;
-                },
-                () => {
-                    resultDiv.textContent = '위치 정보를 가져올 수 없어, 기본 검색을 실행합니다.';
-                    const query = encodeURIComponent(foodName.split(' ')[0]);
-                    const url = `https://map.kakao.com/link/search/${query}`;
-                    window.open(url, '_blank');
-                }
-            );
-        });
-
-        function resetUIState() {
-             document.querySelectorAll('.highlight').forEach(n => n.classList.remove('highlight'));
-             resultDiv.innerHTML = '';
-             buttonContainer.classList.add('hidden');
-             kakaoMapButton.classList.add('hidden');
-        }
-
-        function findNextSibling(element, selector) {
-            let sibling = element.nextElementSibling;
-            while(sibling) {
-                if (sibling.matches(selector)) return sibling;
-                sibling = sibling.nextElementSibling;
-            }
-            return null;
-        }
-
-        function ensurePathVisible(node) {
-            let current = node.parentElement;
-            while (current && current.id !== 'tree') {
-                if (current.classList.contains('branch')) {
-                    const parentNode = current.previousElementSibling;
-                    if (parentNode) toggleNode(parentNode, true);
-                }
-                current = current.parentElement;
-            }
-        }
-        
-        function simulateStepByStep(startNode) {
-            let current = startNode;
-            const path = [current];
-
-            while (true) {
-                const branch = findNextSibling(current, '.branch');
-                if (!branch) break;
-                
-                const availableChildren = Array.from(branch.querySelectorAll(':scope > .node')).filter(c => !c.classList.contains('removed'));
-
-                if (availableChildren.length === 0) {
-                    resultDiv.textContent = `🤔 '${current.querySelector('.node-text').textContent.trim()}' 카테고리 메뉴가 모두 제외되었어요!`;
-                    buttonContainer.classList.remove('hidden');
-                    return;
-                }
-                const next = availableChildren[Math.floor(Math.random() * availableChildren.length)];
-                path.push(next);
-                current = next;
-            }
-            
-            path.forEach(ensurePathVisible);
-
-            let idx = 0;
-            const interval = setInterval(() => {
-                if (idx > 0 && path[idx - 1] !== selectionStartNode) {
-                    path[idx - 1].classList.remove('highlight');
-                }
-                if (idx < path.length) {
-                    path[idx].classList.add('highlight');
-                    idx++;
-                } else {
-                    clearInterval(interval);
-                    const finalChoice = path[path.length - 1];
-                    const finalText = finalChoice.querySelector('.node-text').textContent.trim();
-                    finalChoice.classList.add('highlight');
-                    resultDiv.innerHTML = `🎉 오늘은... <strong>${finalText}</strong>! 🎉`;
-                    
-                    kakaoMapButton.dataset.food = finalText;
-                    buttonContainer.classList.remove('hidden');
-                    kakaoMapButton.classList.remove('hidden');
-                }
-            }, 700);
-        }
-        
-        setupNodes();
+  function renderInitialSetup() {
+    treeContainer.innerHTML = `
+        <div class="initial-setup">
+            <h3>😮 메뉴가 하나도 없네요!</h3>
+            <p>아래 버튼을 눌러 기본 메뉴를 생성하고 시작해 보세요.</p>
+            <button id="create-default-menus-btn" class="action-button start">기본 메뉴 생성하기</button>
+        </div>
+    `;
+    document.getElementById('create-default-menus-btn').addEventListener('click', async (e) => {
+        e.target.disabled = true;
+        e.target.textContent = '생성 중...';
+        await createDefaultMenus();
     });
-  </script>
+  }
+
+  async function createDefaultMenus() {
+    const defaultMenus = [
+        { name: '술을 먹는다', parent: 'root' }, { name: '술 안 먹는다', parent: 'root' },
+        { name: '소주', parent: '술을 먹는다' }, { name: '삼겹살', parent: '소주' }, { name: '감자탕', parent: '소주' },
+        { name: '맥주', parent: '술을 먹는다' }, { name: '치킨', parent: '맥주' }, { name: '피자', parent: '맥주' },
+        { name: '와인', parent: '술을 먹는다' }, { name: '스테이크', parent: '와인' }, { name: '파스타', parent: '와인' }, { name: '치즈', parent: '와인' },
+        { name: '막걸리', parent: '술을 먹는다' }, { name: '파전', parent: '막걸리' },
+        { name: '한식', parent: '술 안 먹는다' }, { name: '제육볶음', parent: '한식' }, { name: '김치찌개', parent: '한식' },
+        { name: '양식', parent: '술 안 먹는다' }, { name: '파스타', parent: '양식' }
+    ];
+    const batch = writeBatch(db);
+    defaultMenus.forEach(menu => batch.set(doc(menuItemsCollection), menu));
+    await batch.commit();
+  }
+
+  function renderTree(items) {
+      treeContainer.innerHTML = '';
+      const itemsByParent = items.reduce((acc, item) => {
+          (acc[item.parent] = acc[item.parent] || []).push(item);
+          return acc;
+      }, {});
+      const rootItems = itemsByParent['root'] || [];
+      rootItems.forEach(item => {
+          const nodeWrapper = createNodeElement(item, itemsByParent);
+          treeContainer.appendChild(nodeWrapper);
+      });
+
+      // [수정] 편집 후에도 선택 상태 복원
+      if (selectionStartNodeName) {
+        const selectedNode = treeContainer.querySelector(`.node[data-name="${selectionStartNodeName}"]`);
+        const otherNodeName = selectionStartNodeName === '술을 먹는다' ? '술 안 먹는다' : '술을 먹는다';
+        const otherNode = treeContainer.querySelector(`.node[data-name="${otherNodeName}"]`);
+        if (selectedNode && otherNode) {
+            makeChoice(selectedNode, otherNode);
+        }
+      }
+  }
+  
+  function createNodeElement(item, itemsByParent) {
+    const nodeWrapper = document.createElement('div');
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.dataset.id = item.id;
+    node.dataset.name = item.name;
+
+    const nodeContent = document.createElement('div');
+    nodeContent.className = 'node-content';
+    const nodeText = document.createElement('span');
+    nodeText.className = 'node-text';
+    nodeText.innerHTML = item.parent === 'root' ? `<strong>${item.name}</strong>` : item.name;
+    nodeContent.appendChild(nodeText);
+    node.appendChild(nodeContent);
+
+    const children = itemsByParent[item.name] || [];
+    const isParentNode = children.length > 0;
+    
+    // [수정] 편집 컨트롤 UI 생성 로직 단순화
+    const editControls = document.createElement('div');
+    editControls.className = 'edit-controls';
+    if (isParentNode) {
+        const addButton = document.createElement('button');
+        addButton.className = 'edit-btn';
+        addButton.textContent = '+';
+        addButton.title = '하위 메뉴 추가';
+        editControls.appendChild(addButton);
+    }
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'delete-btn';
+    deleteButton.textContent = '×';
+    deleteButton.title = '이번 추천에서 제외하기';
+    if (item.parent !== 'root') {
+      editControls.appendChild(deleteButton);
+    }
+    node.appendChild(editControls);
+    nodeWrapper.appendChild(node);
+
+    if (isParentNode) {
+        node.classList.add('parent-node');
+        const toggleIcon = document.createElement('span');
+        toggleIcon.className = 'toggle-icon';
+        toggleIcon.textContent = '▶';
+        nodeContent.insertBefore(toggleIcon, nodeText);
+        const branch = document.createElement('div');
+        branch.className = 'branch';
+        children.forEach(child => {
+            branch.appendChild(createNodeElement(child, itemsByParent));
+        });
+        nodeWrapper.appendChild(branch);
+    }
+    addNodeEventListeners(nodeWrapper);
+    return nodeWrapper;
+  }
+
+  function addNodeEventListeners(nodeWrapper) {
+      const node = nodeWrapper.querySelector('.node');
+      const nodeContent = node.querySelector('.node-content');
+      const parentName = node.dataset.name;
+
+      if(node.classList.contains('parent-node')){
+        nodeContent.addEventListener('click', () => {
+            if(!isEditMode) toggleNode(node);
+        });
+      }
+      
+      if (parentName === '술을 먹는다' || parentName === '술 안 먹는다') {
+          node.classList.add('choice-node');
+          node.addEventListener('click', () => {
+              if (isEditMode) return;
+              const otherChoiceName = parentName === '술을 먹는다' ? '술 안 먹는다' : '술을 먹는다';
+              const otherNode = treeContainer.querySelector(`.node[data-name="${otherChoiceName}"]`);
+              makeChoice(node, otherNode);
+          });
+      }
+
+      const addBtn = node.querySelector('.edit-btn');
+      if (addBtn) {
+          addBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const newMenuNamesString = prompt(`'${parentName}'의 하위 메뉴를 콤마(,)로 구분하여 입력하세요.`);
+              if (newMenuNamesString) {
+                  const menuNames = newMenuNamesString.split(',').map(s => s.trim()).filter(Boolean);
+                  const batch = writeBatch(db);
+                  menuNames.forEach(name => {
+                      batch.set(doc(menuItemsCollection), { name, parent: parentName });
+                  });
+                  batch.commit();
+              }
+          });
+      }
+      
+      const deleteBtn = node.querySelector('.delete-btn');
+      if (deleteBtn) {
+          // [수정] 삭제 버튼 로직 변경
+          deleteBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              node.classList.toggle('temp-removed');
+              deleteBtn.innerHTML = node.classList.contains('temp-removed') ? '&#43;' : '&times;';
+              deleteBtn.title = node.classList.contains('temp-removed') ? '추천에 다시 포함하기' : '이번 추천에서 제외하기';
+          });
+      }
+  }
+  
+  function toggleNode(node, forceExpand) {
+      const branch = node.parentElement.querySelector('.branch');
+      if (!branch) return;
+      const isExpanded = node.classList.contains('expanded');
+      const shouldBeVisible = forceExpand === undefined ? !isExpanded : forceExpand;
+      node.classList.toggle('expanded', shouldBeVisible);
+      branch.classList.toggle('visible', shouldBeVisible);
+      const icon = node.querySelector('.toggle-icon');
+      if(icon) {
+          icon.style.transform = shouldBeVisible ? 'rotate(90deg)' : 'rotate(0deg)';
+      }
+  }
+  
+  function makeChoice(selectedNode, unselectedNode) {
+    selectedNode.classList.add('selected');
+    unselectedNode.classList.add('unselected');
+    document.querySelectorAll('.choice-node').forEach(n => n.style.pointerEvents = 'none');
+    toggleNode(selectedNode, true); 
+    selectionStartNodeName = selectedNode.dataset.name; // 이름으로 저장
+    buttonContainer.classList.remove('hidden');
+    const choiceText = selectedNode.dataset.name === '술을 먹는다' ? '술과 안주' : '메뉴';
+    startButton.textContent = `✨ 오늘의 ${choiceText} 결정!`;
+  }
+  
+  editButton.addEventListener('click', () => {
+      isEditMode = !isEditMode;
+      body.classList.toggle('edit-mode');
+      editButton.innerHTML = isEditMode ? '✅ 완료' : '✏️ 편집';
+  });
+
+  resetButton.addEventListener('click', () => resetUIState(true));
+  startButton.addEventListener('click', () => {
+    const startNode = treeContainer.querySelector(`.node[data-name="${selectionStartNodeName}"]`);
+    if (!startNode) return;
+    buttonContainer.classList.add('hidden');
+    simulateStepByStep(startNode);
+  });
+  
+  function simulateStepByStep(startNode) {
+    let current = startNode;
+    const path = [current];
+    while (true) {
+        let branch = current.parentElement.querySelector('.branch');
+        if (!branch) break;
+        
+        // [수정] 제외 필터링 로직 변경
+        let availableChildren = Array.from(branch.querySelectorAll(':scope > div > .node')).filter(c => !c.classList.contains('temp-removed'));
+        
+        if (availableChildren.length === 0) {
+            resultDiv.textContent = `🤔 '${current.dataset.name}' 카테고리 메뉴가 모두 제외되었어요!`;
+            buttonContainer.classList.remove('hidden');
+            return;
+        }
+        const next = availableChildren[Math.floor(Math.random() * availableChildren.length)];
+        path.push(next);
+        current = next;
+    }
+    
+    path.forEach(ensurePathVisible);
+    let idx = 0;
+    const interval = setInterval(() => {
+        if (idx > 0 && path[idx - 1] !== startNode) path[idx - 1].classList.remove('highlight');
+        if (idx < path.length) {
+            path[idx].classList.add('highlight');
+            idx++;
+        } else {
+            clearInterval(interval);
+            const finalChoice = path[path.length - 1];
+            const finalText = finalChoice.querySelector('.node-text').textContent.trim();
+            finalChoice.classList.add('highlight');
+            
+            let resultHTML = `🎉 오늘은... <strong>${finalText}</strong>!`;
+
+            if (isWineRelated(finalChoice.dataset.name, allMenuItems)) {
+                resultHTML += `<a href="wine.html" class="result-link" target="_blank">유니혀니 와인 앨범에서 어울리는 와인 찾아보기 🍷</a>`;
+            }
+
+            resultDiv.innerHTML = resultHTML;
+            kakaoMapButton.dataset.food = finalText;
+            buttonContainer.classList.remove('hidden');
+            kakaoMapButton.classList.remove('hidden');
+        }
+    }, 700);
+  }
+
+  function isWineRelated(itemName, allItems) {
+      let current = allItems.find(item => item.name === itemName);
+      while(current) {
+          if (current.name === '와인') return true;
+          current = allItems.find(item => item.name === current.parent);
+      }
+      return false;
+  }
+
+  function ensurePathVisible(node) {
+    let current = node.parentElement.closest('.branch');
+    while (current) {
+        const parentNode = current.previousElementSibling;
+        if (parentNode && parentNode.classList.contains('node') && !parentNode.classList.contains('expanded')) {
+            toggleNode(parentNode, true);
+        }
+        current = current.parentElement.closest('.branch');
+    }
+  }
+
+  function resetUIState(fullReset) {
+    document.querySelectorAll('.highlight, .selected, .unselected, .temp-removed').forEach(n => n.classList.remove('highlight', 'selected', 'unselected', 'temp-removed'));
+    document.querySelectorAll('.choice-node').forEach(n => n.style.pointerEvents = 'auto');
+    document.querySelectorAll('.delete-btn').forEach(btn => { btn.innerHTML = '&times;'; });
+    resultDiv.innerHTML = '';
+    buttonContainer.classList.add('hidden');
+    kakaoMapButton.classList.add('hidden');
+    selectionStartNodeName = null;
+    if(fullReset) {
+        document.querySelectorAll('.branch.visible').forEach(b => b.classList.remove('visible'));
+        document.querySelectorAll('.node.expanded').forEach(n => n.classList.remove('expanded'));
+    }
+  }
+
+  kakaoMapButton.addEventListener('click', () => {
+    const foodName = kakaoMapButton.dataset.food;
+    if (!foodName) return;
+    resultDiv.innerHTML = '위치 정보 가져오는 중... <div class="loading-spinner"></div>';
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const query = encodeURIComponent(foodName.split(' ')[0]);
+        const url = `https://map.kakao.com/link/search/${query}`;
+        window.open(url, '_blank');
+        resultDiv.textContent = `✅ '${foodName}' 주변 맛집을 카카오맵에서 확인하세요!`;
+      },
+      () => {
+        resultDiv.textContent = '위치 정보를 가져올 수 없어, 기본 검색을 실행합니다.';
+        const query = encodeURIComponent(foodName.split(' ')[0]);
+        const url = `https://map.kakao.com/link/search/${query}`;
+        window.open(url, '_blank');
+      }
+    );
+  });
+</script>
 </body>
 </html>
